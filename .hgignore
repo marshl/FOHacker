@@ -1,0 +1,7 @@
+syntax: glob
+.bzr/
+Hacking/Debug/
+*.ipch
+*.sdf
+Hacking\dictionary
+Hacking\out
