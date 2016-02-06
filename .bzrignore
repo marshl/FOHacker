@@ -1,8 +1,0 @@
-/Debug
-/Release
-*.sdf
-/ipch
-*.bzrignore
-Hacking/Debug
-Hacking/Release
-*.opensdf
