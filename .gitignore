@@ -5,3 +5,5 @@ Hacking/Debug/
 *.sdf
 Hacking\dictionary
 Hacking\out
+Hacking/out
+Hacking/dictionary
