@@ -15,6 +15,7 @@
 
 #include "strfunc.h"
 #include "constants.h"
+#include "PuzzleWord.h"
 
 SMALL_RECT AREA_RECT = { ORIGIN_COORD.X, ORIGIN_COORD.Y, TOTAL_SCREEN_WIDTH, TOTAL_SCREEN_HEIGHT };
 
@@ -32,17 +33,6 @@ COORD cursorCoord = { 0, 0 };
 
 std::vector<std::string> hexAddresses(TOTAL_COLUMN_LINE_COUNT, std::string(HEX_CODE_LENGTH, '#'));
 
-const int PUZZLE_WORD_LENGTH = 8;
-
-struct PuzzleWord
-{
-	PuzzleWord(std::string _text) : text(_text), isHighlighted(false), isRemoved(false), position(-1) { }
-	std::string text;
-	bool isHighlighted;
-	bool isRemoved;
-	int position;
-	COORD screenCoords[PUZZLE_WORD_LENGTH];
-};
 
 const int PUZZLE_DIFFERENCE = 4;
 std::string solutionWord;

@@ -65,10 +65,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PuzzleWord.cpp" />
     <ClCompile Include="strfunc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
+    <ClInclude Include="PuzzleWord.h" />
     <ClInclude Include="strfunc.h" />
   </ItemGroup>
   <ItemGroup>
