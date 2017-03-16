@@ -11,14 +11,10 @@
 #include <cmath>
 #include <sstream>
 #include <list>
+#include <boost/algorithm/clamp.hpp>
 
 #include "strfunc.h"
 #include "constants.h"
-
-template <typename T> T clamp( const T& _value, const T& _low, const T& _high ) 
-{
-	return _value < _low ? _low : ( _value > _high ? _high : _value ); 
-}
 
 SMALL_RECT AREA_RECT = { ORIGIN_COORD.X, ORIGIN_COORD.Y, TOTAL_SCREEN_WIDTH, TOTAL_SCREEN_HEIGHT };
 
@@ -106,8 +102,8 @@ int main( int argc, char* argv[] )
 				if ( record->EventType == MOUSE_EVENT )
 				{
 					cursorCoord = record->Event.MouseEvent.dwMousePosition;
-					cursorCoord.X = clamp( (int)cursorCoord.X, 0, TOTAL_SCREEN_WIDTH-1 );
-					cursorCoord.Y = clamp( (int)cursorCoord.Y, 0, TOTAL_SCREEN_HEIGHT-1 );
+					cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, TOTAL_SCREEN_WIDTH-1 );
+					cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, TOTAL_SCREEN_HEIGHT-1 );
 					
 					OnMouseMoveEvent();
 
