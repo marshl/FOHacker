@@ -182,8 +182,8 @@ void RefreshBuffer()
 	{
 		for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
 		{
-			COORD coord = puzzleWords[i]->screenCoords[j];
-			characterBuffer[coord.Y][coord.X] = puzzleWords[i]->text[j];
+			COORD coord = puzzleWords[i]->GetScreenCoord(j);
+			characterBuffer[coord.Y][coord.X] = puzzleWords[i]->GetText()[j];
 		}
 	}
 
@@ -204,11 +204,11 @@ void RefreshBuffer()
 	{
 		PuzzleWord* puzzleWord = puzzleWords[i];
 
-		if (puzzleWord->isHighlighted)
+		if (puzzleWord->IsHighlighted())
 		{
 			for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
 			{
-				COORD& pos = puzzleWord->screenCoords[j];
+				COORD& pos = puzzleWord->GetScreenCoord(j);
 				highlightBuffer[pos.Y][pos.X] = true;
 			}
 		}
@@ -217,7 +217,7 @@ void RefreshBuffer()
 	if (currentHighlightedPuzzleWord != nullptr)
 	{
 		std::ostringstream outstr;
-		outstr << "> " << currentHighlightedPuzzleWord->text;
+		outstr << "> " << currentHighlightedPuzzleWord->GetText();
 
 		characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
 			outstr.str().length(),
@@ -311,8 +311,8 @@ void PlacePuzzleWords()
 		for (unsigned int j = 0; j < i; ++j)
 		{
 			if (i != j
-				&& puzzleWords[j]->position != -1
-				&& std::abs(puzzleWords[j]->position - place) < PUZZLE_WORD_LENGTH + 1)
+				&& puzzleWords[j]->GetPosition() != -1
+				&& std::abs(puzzleWords[j]->GetPosition() - place) < PUZZLE_WORD_LENGTH + 1)
 			{
 				badPlacement = true;
 				break;
@@ -321,14 +321,14 @@ void PlacePuzzleWords()
 
 		if (!badPlacement)
 		{
-			puzzleWords[i]->position = place;
+			puzzleWords[i]->SetPosition(place);
 			++i;
 		}
 	}
 
 	for (unsigned int i = 0; i < puzzleWords.size(); ++i)
 	{
-		int place = puzzleWords[i]->position;
+		int place = puzzleWords[i]->GetPosition();
 
 		int x = place % COLUMN_CHARACTER_WIDTH;
 		int y = (place - x) / COLUMN_CHARACTER_WIDTH;
@@ -345,12 +345,12 @@ void PlacePuzzleWords()
 		if (x + PUZZLE_WORD_LENGTH > COLUMN_CHARACTER_WIDTH)
 		{
 			// Separate it into two
-			std::string chunk1 = puzzleWords[i]->text.substr(0, COLUMN_CHARACTER_WIDTH - x + 1);
-			std::string chunk2 = puzzleWords[i]->text.substr(COLUMN_CHARACTER_WIDTH - x + 1);
+			std::string chunk1 = puzzleWords[i]->GetText().substr(0, COLUMN_CHARACTER_WIDTH - x + 1);
+			std::string chunk2 = puzzleWords[i]->GetText().substr(COLUMN_CHARACTER_WIDTH - x + 1);
 
 			for (int j = 0; j < COLUMN_CHARACTER_WIDTH - x + 1; ++j)
 			{
-				COORD& coord = puzzleWords[i]->screenCoords[j];
+				COORD& coord = puzzleWords[i]->GetScreenCoord(j);
 
 				coord.X = x + HEX_CODE_LENGTH + column * TOTAL_COLUMN_WIDTH + j;
 				coord.Y = y + LINES_BEFORE_COLUMNS;
@@ -367,7 +367,7 @@ void PlacePuzzleWords()
 			int k = 0;
 			for (int j = COLUMN_CHARACTER_WIDTH - x + 1; j < PUZZLE_WORD_LENGTH; ++j)
 			{
-				COORD& coord = puzzleWords[i]->screenCoords[j];
+				COORD& coord = puzzleWords[i]->GetScreenCoord(j);
 				coord.X = HEX_CODE_LENGTH + 1 + column * TOTAL_COLUMN_WIDTH + k;
 				coord.Y = y + LINES_BEFORE_COLUMNS;
 				++k;
@@ -377,7 +377,7 @@ void PlacePuzzleWords()
 		{
 			for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
 			{
-				COORD& coord = puzzleWords[i]->screenCoords[j];
+				COORD& coord = puzzleWords[i]->GetScreenCoord(j);
 				coord.X = x + 1 + HEX_CODE_LENGTH + column * TOTAL_COLUMN_WIDTH + j;
 				coord.Y = y + LINES_BEFORE_COLUMNS;
 			}
@@ -391,7 +391,7 @@ void OnClickEvent()
 
 	if (currentHighlightedPuzzleWord != nullptr)
 	{
-		int diff = StringDiff(currentHighlightedPuzzleWord->text, solutionWord);
+		int diff = StringDiff(currentHighlightedPuzzleWord->GetText(), solutionWord);
 
 		if (diff == 0)
 		{
@@ -399,7 +399,7 @@ void OnClickEvent()
 		}
 		else
 		{
-			attemptedWords.push_back(currentHighlightedPuzzleWord->text);
+			attemptedWords.push_back(currentHighlightedPuzzleWord->GetText());
 			--attemptsRemaining;
 		}
 	}
@@ -411,7 +411,7 @@ void OnMouseMoveEvent()
 
 	for (unsigned int i = 0; i < puzzleWords.size(); ++i)
 	{
-		puzzleWords[i]->isHighlighted = false;
+		puzzleWords[i]->SetHighlight(false);
 	}
 
 	for (unsigned int i = 0; i < puzzleWords.size() && currentHighlightedPuzzleWord == nullptr; ++i)
@@ -420,10 +420,10 @@ void OnMouseMoveEvent()
 
 		for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
 		{
-			if (word->screenCoords[j].X == cursorCoord.X
-				&& word->screenCoords[j].Y == cursorCoord.Y)
+			if (word->GetScreenCoord(j).X == cursorCoord.X
+				&& word->GetScreenCoord(j).Y == cursorCoord.Y)
 			{
-				word->isHighlighted = true;
+				word->SetHighlight(true);
 				currentHighlightedPuzzleWord = word;
 				break;
 			}
