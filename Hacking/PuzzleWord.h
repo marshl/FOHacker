@@ -3,13 +3,17 @@
 
 #include <Windows.h>
 #include <string>
+#include <boost/container/vector.hpp>
 
 #include "constants.h"
 
 class PuzzleWord
 {
 public:
-	PuzzleWord(std::string _text) : text(_text), isHighlighted(false), isRemoved(false), position(-1) { }
+	PuzzleWord(std::string _text) : text(_text), isHighlighted(false), isRemoved(false), position(-1)
+	{
+		this->screenCoords.resize(_text.length(), { 0, 0 });
+	}
 
 	const std::string& GetText() const;
 
@@ -29,7 +33,7 @@ private:
 	bool isHighlighted;
 	bool isRemoved;
 	int position;
-	COORD screenCoords[PUZZLE_WORD_LENGTH];
+	boost::container::vector<COORD> screenCoords;
 };
 
 #endif
