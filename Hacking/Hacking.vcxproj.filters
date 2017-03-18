@@ -24,6 +24,15 @@
     <ClCompile Include="PuzzleWord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HackingController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HackingModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HackingView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strfunc.h">
@@ -33,6 +42,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PuzzleWord.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HackingController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HackingModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HackingView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

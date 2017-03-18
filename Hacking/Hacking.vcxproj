@@ -64,12 +64,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="HackingController.cpp" />
+    <ClCompile Include="HackingModel.cpp" />
+    <ClCompile Include="HackingView.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PuzzleWord.cpp" />
     <ClCompile Include="strfunc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
+    <ClInclude Include="HackingController.h" />
+    <ClInclude Include="HackingModel.h" />
+    <ClInclude Include="HackingView.h" />
     <ClInclude Include="PuzzleWord.h" />
     <ClInclude Include="strfunc.h" />
   </ItemGroup>
