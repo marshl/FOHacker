@@ -2,11 +2,8 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <Windows.h>
 #include <fstream>
 #include <iostream>
-#include <string>
-#include <vector>
 #include <ctime>
 #include <cassert>
 #include <algorithm>
@@ -19,41 +16,6 @@
 #include "constants.h"
 #include "PuzzleWord.h"
 
-SMALL_RECT AREA_RECT = { ORIGIN_COORD.X, ORIGIN_COORD.Y, TOTAL_SCREEN_WIDTH, TOTAL_SCREEN_HEIGHT };
-
-CHAR_INFO* displayBuffer = new CHAR_INFO[TOTAL_SCREEN_HEIGHT * TOTAL_SCREEN_WIDTH];
-
-std::vector<std::string> characterBuffer(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
-std::vector<std::vector<bool> > highlightBuffer(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
-
-
-int attemptsRemaining = STARTING_ATTEMPT_COUNT;
-
-std::string stringBuffer(TOTAL_COLUMNS_CHARACTER_COUNT, '#');
-
-COORD cursorCoord = { 0, 0 };
-
-std::vector<std::string> hexAddresses(TOTAL_COLUMN_LINE_COUNT, std::string(HEX_CODE_LENGTH, '#'));
-
-
-const int PUZZLE_DIFFERENCE = 4;
-std::string solutionWord;
-std::vector<PuzzleWord*> puzzleWords;
-
-std::vector<std::string> attemptedWords;
-
-PuzzleWord* currentHighlightedPuzzleWord;
-
-void RefreshBuffer();
-void SwapBuffers();
-void SetHexAddresses();
-void SetPuzzleWords();
-void PlacePuzzleWords();
-void OnClickEvent();
-void OnMouseMoveEvent();
-void GetSampleWordList(std::vector<std::string>& _out);
-COORD GetOutputCursorCoord();
-
 HackingController::HackingController(HackingModel* hackingModel, HackingView* hackingView)
 {
 	assert(hackingModel != nullptr);
@@ -61,11 +23,26 @@ HackingController::HackingController(HackingModel* hackingModel, HackingView* ha
 
 	this->hackingModel = hackingModel;
 	this->hackingView = hackingView;
-}
 
+	this->displayBuffer = new CHAR_INFO[TOTAL_SCREEN_HEIGHT * TOTAL_SCREEN_WIDTH];
+
+	this->characterBuffer.resize(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
+	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
+
+	this->attemptsRemaining = STARTING_ATTEMPT_COUNT;
+
+	this->stringBuffer.resize(TOTAL_COLUMNS_CHARACTER_COUNT, '#');
+
+	this->cursorCoord = { 0, 0 };
+
+	this->hexAddresses.resize(TOTAL_COLUMN_LINE_COUNT, std::string(HEX_CODE_LENGTH, '#'));
+
+	this->currentHighlightedPuzzleWord = nullptr;
+}
 
 HackingController::~HackingController()
 {
+	delete this->displayBuffer;
 }
 
 void HackingController::Run()
@@ -132,7 +109,9 @@ void HackingController::Run()
 
 		RefreshBuffer();
 		SwapBuffers();
-		WriteConsoleOutput(outputHandle, displayBuffer, TOTAL_SIZE_COORD, ORIGIN_COORD, &AREA_RECT);
+
+		SMALL_RECT AREA_RECT = { ORIGIN_COORD.X, ORIGIN_COORD.Y, TOTAL_SCREEN_WIDTH, TOTAL_SCREEN_HEIGHT };
+		WriteConsoleOutput(outputHandle, this->displayBuffer, TOTAL_SIZE_COORD, ORIGIN_COORD, &AREA_RECT);
 		SetConsoleCursorPosition(outputHandle, GetOutputCursorCoord());
 		Sleep(1000 / 24);
 	}
@@ -141,36 +120,33 @@ void HackingController::Run()
 	{
 		delete puzzleWords[i];
 	}
-	delete displayBuffer;
 }
 
-
-
-void SwapBuffers()
+void HackingController::SwapBuffers()
 {
 	for (unsigned int y = 0; y < TOTAL_SCREEN_HEIGHT; ++y)
 	{
 		for (unsigned int x = 0; x < TOTAL_SCREEN_WIDTH; ++x)
 		{
 			int index = y * TOTAL_SCREEN_WIDTH + x;
-			displayBuffer[index].Char.AsciiChar = characterBuffer[y][x];
-			displayBuffer[index].Attributes = highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
+			displayBuffer[index].Char.AsciiChar = this->characterBuffer[y][x];
+			displayBuffer[index].Attributes = this->highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
 		}
 	}
 }
 
-void RefreshBuffer()
+void HackingController::RefreshBuffer()
 {
 	for (int i = 0; i < INTRO_LINE_COUNT; ++i)
 	{
-		characterBuffer[i].replace(0, introLines[i].size(), introLines[i]);
+		this->characterBuffer[i].replace(0, introLines[i].size(), introLines[i]);
 	}
 
 	std::ostringstream outstr;
 	outstr << attemptsRemaining << " ATTEMPT(S) LEFT:";
 	std::string str = outstr.str();
 
-	characterBuffer[INTRO_LINE_COUNT + 1].replace(0, str.size(), str);
+	this->characterBuffer[INTRO_LINE_COUNT + 1].replace(0, str.size(), str);
 
 	int index = 0;
 	for (int x = 0; x < COLUMN_COUNT; ++x)
@@ -179,12 +155,12 @@ void RefreshBuffer()
 		{
 			assert(index < TOTAL_COLUMN_LINE_COUNT);
 
-			characterBuffer[y + LINES_BEFORE_COLUMNS].replace(
+			this->characterBuffer[y + LINES_BEFORE_COLUMNS].replace(
 				x*TOTAL_COLUMN_WIDTH,
 				HEX_CODE_LENGTH,
 				hexAddresses[index]);
 
-			characterBuffer[y + LINES_BEFORE_COLUMNS].replace(
+			this->characterBuffer[y + LINES_BEFORE_COLUMNS].replace(
 				x*TOTAL_COLUMN_WIDTH + HEX_CODE_LENGTH + 1,
 				COLUMN_CHARACTER_WIDTH,
 				stringBuffer.substr(index * COLUMN_CHARACTER_WIDTH, COLUMN_CHARACTER_WIDTH));
@@ -198,7 +174,7 @@ void RefreshBuffer()
 		for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
 		{
 			COORD coord = puzzleWords[i]->GetScreenCoord(j);
-			characterBuffer[coord.Y][coord.X] = puzzleWords[i]->GetText()[j];
+			this->characterBuffer[coord.Y][coord.X] = puzzleWords[i]->GetText()[j];
 		}
 	}
 
@@ -206,7 +182,7 @@ void RefreshBuffer()
 	{
 		for (unsigned int x = 0; x < TOTAL_SCREEN_WIDTH; ++x)
 		{
-			highlightBuffer[y][x] = false;
+			this->highlightBuffer[y][x] = false;
 		}
 	}
 
@@ -224,7 +200,7 @@ void RefreshBuffer()
 			for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
 			{
 				COORD& pos = puzzleWord->GetScreenCoord(j);
-				highlightBuffer[pos.Y][pos.X] = true;
+				this->highlightBuffer[pos.Y][pos.X] = true;
 			}
 		}
 	}
@@ -234,7 +210,7 @@ void RefreshBuffer()
 		std::ostringstream outstr;
 		outstr << "> " << currentHighlightedPuzzleWord->GetText();
 
-		characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
+		this->characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
 			outstr.str().length(),
 			outstr.str());
 	}
@@ -243,15 +219,15 @@ void RefreshBuffer()
 		std::ostringstream outstr;
 		outstr << "> " << std::string(PUZZLE_WORD_LENGTH, ' ');
 
-		characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
+		this->characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
 			outstr.str().length(),
 			outstr.str());
 	}
 
-	highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
+	this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
 }
 
-void SetHexAddresses()
+void HackingController::SetHexAddresses()
 {
 	int address = rand() % 0xF000 + 0xFFF;
 	for (int i = 0; i < TOTAL_COLUMN_LINE_COUNT; ++i)
@@ -263,7 +239,7 @@ void SetHexAddresses()
 	}
 }
 
-void SetPuzzleWords()
+void HackingController::SetPuzzleWords()
 {
 	std::list<std::string> words;
 	std::vector<std::string> triedWords;
@@ -314,7 +290,7 @@ void SetPuzzleWords()
 	}
 }
 
-void PlacePuzzleWords()
+void HackingController::PlacePuzzleWords()
 {
 	assert(TOTAL_COLUMNS_CHARACTER_COUNT > PUZZLE_WORD_LENGTH);
 
@@ -400,7 +376,7 @@ void PlacePuzzleWords()
 	}
 }
 
-void OnClickEvent()
+void HackingController::OnClickEvent()
 {
 	// Determine if the cursorCoord was over a word
 
@@ -420,7 +396,7 @@ void OnClickEvent()
 	}
 }
 
-void OnMouseMoveEvent()
+void HackingController::OnMouseMoveEvent()
 {
 	currentHighlightedPuzzleWord = nullptr;
 
@@ -446,7 +422,7 @@ void OnMouseMoveEvent()
 	}
 }
 
-void GetSampleWordList(std::vector<std::string>& _out)
+void HackingController::GetSampleWordList(std::vector<std::string>& _out)
 {
 	std::ifstream fin("dictionary");
 	if (!fin.is_open())
@@ -466,7 +442,7 @@ void GetSampleWordList(std::vector<std::string>& _out)
 	fin.close();
 }
 
-COORD GetOutputCursorCoord()
+COORD HackingController::GetOutputCursorCoord()
 {
 	COORD c = { TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1, TOTAL_SCREEN_HEIGHT - 1 };
 	return c;
