@@ -23,31 +23,12 @@ private:
 	HackingView* hackingView;
 	HackingModel* hackingModel;
 
-	CHAR_INFO* displayBuffer;
-
-	std::vector<std::string> characterBuffer;
-	std::vector<std::vector<bool> > highlightBuffer;
-
-	int attemptsRemaining;
-	std::string stringBuffer;
-
 	COORD cursorCoord;
 
-	std::vector<std::string> hexAddresses;
-	std::string solutionWord;
-	std::vector<PuzzleWord*> puzzleWords;
-	std::vector<std::string> attemptedWords;
 
-	PuzzleWord* currentHighlightedPuzzleWord;
+	HANDLE inputHandle;
+	HANDLE outputHandle;
 
-	void RefreshBuffer();
-	void SwapBuffers();
-	void SetHexAddresses();
-	void SetPuzzleWords();
-	void PlacePuzzleWords();
-	void OnClickEvent();
-	void OnMouseMoveEvent();
-	void GetSampleWordList(std::vector<std::string>& _out);
 	COORD GetOutputCursorCoord();
 };
 
