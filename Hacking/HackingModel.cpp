@@ -5,6 +5,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 #include "constants.h"
 #include "strfunc.h"
@@ -120,52 +121,65 @@ void HackingModel::SetHexAddresses()
 
 void HackingModel::SetPuzzleWords()
 {
-	std::list<std::string> words;
+	std::vector<std::string> allWords;
+	std::vector<std::string> solutionWords;
 	std::vector<std::string> triedWords;
-	std::vector<std::string> goodWords;
 
-	GetSampleWordList(triedWords);
-	assert(triedWords.size() > WORD_COUNT);
+	GetSampleWordList(allWords);
 
-	std::list<std::string>::iterator iter = words.begin();
+	assert(allWords.size() >= WORD_COUNT);
+
+	std::random_shuffle(allWords.begin(), allWords.end());
 
 	while (true)
 	{
-		if (words.size() == 0)
-		{ // Ran out of usable words, reset and try again
-			words.insert(words.end(), triedWords.begin(), triedWords.end());
-			triedWords.clear();
-			puzzleWords.clear();
-			goodWords.clear();
+		std::string randWord = allWords.back();
+		bool wordAdded = false;
 
-			iter = words.begin();
-			std::advance(iter, rand() % words.size());
-			solutionWord = *iter;
+		// Add the word if there are no others
+		if (solutionWords.size() == 0)
+		{
+			solutionWords.push_back(randWord);
+			wordAdded = true;
 		}
+		else
+		{
+			for each(const std::string& solutionWord in solutionWords)
+			{
+				int difference = StringDiff(solutionWord, randWord);
+				if (difference > PUZZLE_DIFFERENCE || difference == 0)
+				{
+					continue;
+				}
 
-		// Get a random word
-		iter = words.begin();
-		std::advance(iter, rand() % words.size());
-		std::string randWord = *iter;
+				solutionWords.push_back(randWord);
+				wordAdded = true;
 
-		int diff = StringDiff(randWord, solutionWord);
-		if (diff <= PUZZLE_DIFFERENCE)
-		{ // If within tolerances, add to the list
-			goodWords.push_back(randWord);
-			if (goodWords.size() >= WORD_COUNT - 1)
-			{// We only need N-1 because the last word is the solution word
+				if (solutionWords.size() == WORD_COUNT)
+				{
+					for each(std::string word in solutionWords)
+					{
+						this->puzzleWords.push_back(new PuzzleWord(word));
+					}
+					return;
+				}
+
+				// More words are needed, conitnue the loop
 				break;
 			}
 		}
-		// Add word to used words and remove from searchable list
-		triedWords.push_back(randWord);
-		words.erase(iter);
-	}
 
-	puzzleWords.push_back(new PuzzleWord(solutionWord));
-	for (unsigned int i = 0; i < WORD_COUNT - 1; ++i)
-	{
-		puzzleWords.push_back(new PuzzleWord(goodWords[i]));
+		triedWords.push_back(randWord);
+		allWords.pop_back();
+		
+		if (allWords.size() == 0)
+		{
+			allWords.insert(allWords.begin(), triedWords.begin(), triedWords.end());
+			//allWords.insert(allWords.begin(), solutionWords.begin(), solutionWords.end());
+			triedWords.clear();
+			solutionWords.clear();
+			std::random_shuffle(allWords.begin(), allWords.end());
+		}
 	}
 }
 
