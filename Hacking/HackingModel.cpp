@@ -283,6 +283,7 @@ void HackingModel::GetSampleWordList(std::vector<std::string>& _out)
 	{
 		if (word.length() == PUZZLE_WORD_LENGTH)
 		{
+			std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 			_out.push_back(word);
 		}
 	}
