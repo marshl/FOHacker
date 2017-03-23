@@ -48,6 +48,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
     </Link>
+    <PreBuildEvent>
+      <Command>xcopy /y $(ProjectDir)dictionary  $(OutDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -62,6 +65,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>NotSet</SubSystem>
     </Link>
+    <PreBuildEvent>
+      <Command>xcopy /y $(ProjectDir)dictionary  $(OutDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="HackingController.cpp" />
@@ -80,6 +86,7 @@
     <ClInclude Include="strfunc.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dictionary" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
