@@ -281,18 +281,10 @@ void HackingModel::GetSampleWordList(std::vector<std::string>& _out)
 	std::string word;
 	while (fin >> word)
 	{
-		if (word.length() != PUZZLE_WORD_LENGTH)
+		if (word.length() == PUZZLE_WORD_LENGTH)
 		{
-			continue;
+			_out.push_back(word);
 		}
-
-		if (word.find_first_not_of("abcdefghijklmnopqrstuvwxyz") != word.npos)
-		{
-			continue;
-		}
-
-		_out.push_back(word);
-
 	}
 	fin.close();
 }
