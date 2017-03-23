@@ -171,7 +171,7 @@ void HackingModel::SetPuzzleWords()
 
 		triedWords.push_back(randWord);
 		allWords.pop_back();
-		
+
 		if (allWords.size() == 0)
 		{
 			allWords.insert(allWords.begin(), triedWords.begin(), triedWords.end());
@@ -281,10 +281,18 @@ void HackingModel::GetSampleWordList(std::vector<std::string>& _out)
 	std::string word;
 	while (fin >> word)
 	{
-		if (word.length() == PUZZLE_WORD_LENGTH)
+		if (word.length() != PUZZLE_WORD_LENGTH)
 		{
-			_out.push_back(word);
+			continue;
 		}
+
+		if (word.find_first_not_of("abcdefghijklmnopqrstuvwxyz") != word.npos)
+		{
+			continue;
+		}
+
+		_out.push_back(word);
+
 	}
 	fin.close();
 }
