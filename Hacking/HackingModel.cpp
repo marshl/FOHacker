@@ -10,6 +10,7 @@
 #include "constants.h"
 #include "strfunc.h"
 #include "PuzzleWord.h"
+#include "DifficultyLevel.h"
 
 HackingModel::HackingModel()
 {
@@ -22,6 +23,8 @@ HackingModel::HackingModel()
 	this->SetPuzzleWords();
 	this->PlacePuzzleWords();
 	this->SetHexAddresses();
+
+	this->InitialiseDifficultyLevels();
 }
 
 HackingModel::~HackingModel()
@@ -29,6 +32,11 @@ HackingModel::~HackingModel()
 	for (unsigned int i = 0; i < this->puzzleWords.size(); ++i)
 	{
 		delete this->puzzleWords[i];
+	}
+
+	for (unsigned int i = 0; i < this->difficultyLevels.size(); ++i)
+	{
+		delete this->difficultyLevels[i];
 	}
 }
 
@@ -288,4 +296,13 @@ void HackingModel::GetSampleWordList(std::vector<std::string>& _out)
 		}
 	}
 	fin.close();
+}
+
+void HackingModel::InitialiseDifficultyLevels()
+{
+	this->difficultyLevels.push_back(new DifficultyLevel(0, "Very Easy", 9, 5, 2));
+	this->difficultyLevels.push_back(new DifficultyLevel(1, "Easy", 9, 7, 3));
+	this->difficultyLevels.push_back(new DifficultyLevel(2, "Average", 8, 9, 3));
+	this->difficultyLevels.push_back(new DifficultyLevel(3, "Hard", 7, 11, 4));
+	this->difficultyLevels.push_back(new DifficultyLevel(4, "Very Hard", 7, 13, 4));
 }

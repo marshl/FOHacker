@@ -33,6 +33,9 @@
     <ClCompile Include="HackingView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DifficultyLevel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strfunc.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HackingView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DifficultyLevel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

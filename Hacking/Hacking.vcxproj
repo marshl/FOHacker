@@ -70,6 +70,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DifficultyLevel.cpp" />
     <ClCompile Include="HackingController.cpp" />
     <ClCompile Include="HackingModel.cpp" />
     <ClCompile Include="HackingView.cpp" />
@@ -79,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
+    <ClInclude Include="DifficultyLevel.h" />
     <ClInclude Include="HackingController.h" />
     <ClInclude Include="HackingModel.h" />
     <ClInclude Include="HackingView.h" />

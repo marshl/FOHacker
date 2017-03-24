@@ -6,6 +6,7 @@
 #include <Windows.h>
 
 class PuzzleWord;
+class DifficultyLevel;
 
 class HackingModel
 {
@@ -34,6 +35,7 @@ private:
 	std::string solutionWord;
 	std::vector<PuzzleWord*> puzzleWords;
 	std::vector<std::string> attemptedWords;
+	std::vector<DifficultyLevel*> difficultyLevels;
 
 	PuzzleWord* currentHighlightedPuzzleWord;
 
@@ -41,6 +43,7 @@ private:
 	void SetPuzzleWords();
 	void PlacePuzzleWords();
 	void GetSampleWordList(std::vector<std::string>& _out);
+	void InitialiseDifficultyLevels();
 };
 
 #endif
