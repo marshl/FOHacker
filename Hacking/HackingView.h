@@ -20,7 +20,6 @@ public:
 private:
 	HackingModel* hackingModel;
 
-
 	CHAR_INFO* displayBuffer;
 
 	std::vector<std::string> characterBuffer;
@@ -30,9 +29,15 @@ private:
 
 	HANDLE outputHandle;
 
+	void ClearBuffer();
 	void SwapBuffers();
 
 	void RefreshBuffer(COORD cursorCoord);
+
+	void RenderDifficultyScreen(COORD cursorCoord);
+	void RenderGameScreen(COORD cursorCoord);
+
+	void RenderText(COORD position, std::string text);
 };
 
 #endif

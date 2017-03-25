@@ -19,12 +19,6 @@ HackingView::HackingView(HackingModel* hackingModel)
 	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
 
 	this->stringBuffer.resize(TOTAL_COLUMNS_CHARACTER_COUNT, '#');
-
-	for (int i = 0; i < TOTAL_COLUMNS_CHARACTER_COUNT; ++i)
-	{
-		stringBuffer[i] = FILLER_CHARACTERS[rand() % FILLER_CHARACTER_COUNT];
-	}
-
 }
 
 
@@ -35,6 +29,7 @@ HackingView::~HackingView()
 
 void HackingView::Render(COORD cursorCoord)
 {
+	this->ClearBuffer();
 	this->RefreshBuffer(cursorCoord);
 	this->SwapBuffers();
 
@@ -47,6 +42,12 @@ void HackingView::SetOutputHandle(HANDLE handle)
 	this->outputHandle = handle;
 }
 
+
+void HackingView::ClearBuffer()
+{
+	this->characterBuffer.resize(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
+	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
+}
 
 void HackingView::SwapBuffers()
 {
@@ -63,6 +64,23 @@ void HackingView::SwapBuffers()
 
 void HackingView::RefreshBuffer(COORD cursorCoord)
 {
+	if (this->hackingModel->GetCurrentDifficulty() == nullptr)
+	{
+		this->RenderDifficultyScreen(cursorCoord);
+	}
+	else
+	{
+		this->RenderGameScreen(cursorCoord);
+	}
+}
+
+void HackingView::RenderDifficultyScreen(COORD cursorCoord)
+{
+	this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
+}
+
+void HackingView::RenderGameScreen(COORD cursorCoord)
+{
 	for (int i = 0; i < INTRO_LINE_COUNT; ++i)
 	{
 		this->characterBuffer[i].replace(0, introLines[i].size(), introLines[i]);
@@ -70,28 +88,15 @@ void HackingView::RefreshBuffer(COORD cursorCoord)
 
 	std::ostringstream outstr;
 	outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
-	std::string str = outstr.str();
+	this->RenderText({ 0, INTRO_LINE_COUNT + 1 }, outstr.str());
 
-	this->characterBuffer[INTRO_LINE_COUNT + 1].replace(0, str.size(), str);
-
-	int index = 0;
 	for (int x = 0; x < COLUMN_COUNT; ++x)
 	{
 		for (int y = 0; y < COLUMN_HEIGHT; ++y)
 		{
-			assert(index < TOTAL_COLUMN_LINE_COUNT);
-
-			this->characterBuffer[y + LINES_BEFORE_COLUMNS].replace(
-				x*TOTAL_COLUMN_WIDTH,
-				HEX_CODE_LENGTH,
-				this->hackingModel->GetHexAddress(index));
-
-			this->characterBuffer[y + LINES_BEFORE_COLUMNS].replace(
-				x*TOTAL_COLUMN_WIDTH + HEX_CODE_LENGTH + 1,
-				COLUMN_CHARACTER_WIDTH,
-				stringBuffer.substr(index * COLUMN_CHARACTER_WIDTH, COLUMN_CHARACTER_WIDTH));
-
-			++index;
+			const std::string& hexCode = this->hackingModel->GetHexAddress(x * COLUMN_HEIGHT + y);
+			COORD coord = { (short)(x*TOTAL_COLUMN_WIDTH), (short)(y + LINES_BEFORE_COLUMNS) };
+			this->RenderText(coord, hexCode);
 		}
 	}
 
@@ -152,4 +157,12 @@ void HackingView::RefreshBuffer(COORD cursorCoord)
 	}
 
 	this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
+}
+
+void HackingView::RenderText(COORD position, std::string text)
+{
+	for (unsigned int i = 0; i < text.size(); ++i)
+	{
+		this->characterBuffer[position.Y].replace(position.X, text.size(), text);
+	}
 }

@@ -16,15 +16,26 @@ HackingModel::HackingModel()
 {
 	this->attemptsRemaining = STARTING_ATTEMPT_COUNT;
 
-	this->hexAddresses.resize(TOTAL_COLUMN_LINE_COUNT, std::string(HEX_CODE_LENGTH, '#'));
 
 	this->currentHighlightedPuzzleWord = nullptr;
+	this->currentDifficulty = nullptr;
 
 	this->SetPuzzleWords();
 	this->PlacePuzzleWords();
 	this->SetHexAddresses();
 
 	this->InitialiseDifficultyLevels();
+
+	for (int i = 0; i < TOTAL_COLUMN_LINE_COUNT; ++i)
+	{
+		std::string filler('#', COLUMN_CHARACTER_WIDTH);
+		for (int j = 0; j < COLUMN_CHARACTER_WIDTH; ++j)
+		{
+			filler[i] = FILLER_CHARACTERS[rand() % FILLER_CHARACTER_COUNT];
+		}
+
+		this->fillerCharacters.push_back(filler);
+	}
 }
 
 HackingModel::~HackingModel()
@@ -114,9 +125,26 @@ void HackingModel::OnMouseMoveEvent(COORD cursorCoord)
 	}
 }
 
+const DifficultyLevel * const HackingModel::GetCurrentDifficulty() const
+{
+	return this->currentDifficulty;
+}
+
+const DifficultyLevel * const HackingModel::GetDifficultyLevelWithIndex(int index) const
+{
+	return this->difficultyLevels[index];
+}
+
+void HackingModel::SetDifficultyLevel(DifficultyLevel* difficultyLevel)
+{
+	this->currentDifficulty = difficultyLevel;
+}
+
 
 void HackingModel::SetHexAddresses()
 {
+	this->hexAddresses.resize(TOTAL_COLUMN_LINE_COUNT, std::string(HEX_CODE_LENGTH, '#'));
+
 	int address = rand() % 0xF000 + 0xFFF;
 	for (int i = 0; i < TOTAL_COLUMN_LINE_COUNT; ++i)
 	{
@@ -124,6 +152,7 @@ void HackingModel::SetHexAddresses()
 		std::ostringstream stream;
 		stream << "0x" << std::hex << address;
 		hexAddresses[i] = stream.str();
+		std::transform(hexAddresses[i].begin() + 2, hexAddresses[i].end(), hexAddresses[i].begin() + 2, ::toupper);
 	}
 }
 
@@ -133,7 +162,7 @@ void HackingModel::SetPuzzleWords()
 	std::vector<std::string> solutionWords;
 	std::vector<std::string> triedWords;
 
-	GetSampleWordList(allWords);
+	this->GetSampleWordList(allWords);
 
 	assert(allWords.size() >= WORD_COUNT);
 
@@ -183,7 +212,6 @@ void HackingModel::SetPuzzleWords()
 		if (allWords.size() == 0)
 		{
 			allWords.insert(allWords.begin(), triedWords.begin(), triedWords.end());
-			//allWords.insert(allWords.begin(), solutionWords.begin(), solutionWords.end());
 			triedWords.clear();
 			solutionWords.clear();
 			std::random_shuffle(allWords.begin(), allWords.end());
@@ -200,11 +228,10 @@ void HackingModel::PlacePuzzleWords()
 		// Theoretically, this might go infinite with the right conditions
 		int place = rand() % (TOTAL_COLUMNS_CHARACTER_COUNT - PUZZLE_WORD_LENGTH);
 		bool badPlacement = false;
+		// Check for position collisions with words that have already been placed
 		for (unsigned int j = 0; j < i; ++j)
 		{
-			if (i != j
-				&& puzzleWords[j]->GetPosition() != -1
-				&& std::abs(puzzleWords[j]->GetPosition() - place) < PUZZLE_WORD_LENGTH + 1)
+			if (std::abs(puzzleWords[j]->GetPosition() - place) < PUZZLE_WORD_LENGTH + 1)
 			{
 				badPlacement = true;
 				break;
