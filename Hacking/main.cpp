@@ -8,7 +8,6 @@
 #include "HackingModel.h"
 #include "HackingView.h"
 
-
 int main(int argc, char* argv[])
 {
 	srand((unsigned int)time(nullptr));
@@ -22,7 +21,6 @@ int main(int argc, char* argv[])
 	delete hackingController;
 	delete hackingView;
 	delete hackingController;
-
 
 	return 0;
 }

@@ -81,7 +81,7 @@ PuzzleWord * const HackingModel::GetSelectedPuzzleWord() const
 	return this->currentHighlightedPuzzleWord;
 }
 
-void HackingModel::OnClickEvent()
+void HackingModel::OnClickEvent(const COORD& cursorCoord)
 {
 	if (this->currentHighlightedPuzzleWord != nullptr)
 	{
@@ -99,7 +99,7 @@ void HackingModel::OnClickEvent()
 	}
 }
 
-void HackingModel::OnMouseMoveEvent(COORD cursorCoord)
+void HackingModel::OnMouseMoveEvent(const COORD& cursorCoord)
 {
 	this->currentHighlightedPuzzleWord = nullptr;
 

@@ -25,11 +25,8 @@ private:
 
 	COORD cursorCoord;
 
-
 	HANDLE inputHandle;
 	HANDLE outputHandle;
-
-	COORD GetOutputCursorCoord();
 };
 
 #endif

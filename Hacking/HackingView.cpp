@@ -45,7 +45,9 @@ void HackingView::SetOutputHandle(HANDLE handle)
 
 void HackingView::ClearBuffer()
 {
+	this->characterBuffer.clear();
 	this->characterBuffer.resize(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
+	this->highlightBuffer.clear();
 	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
 }
 

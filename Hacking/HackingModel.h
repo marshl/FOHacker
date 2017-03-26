@@ -24,8 +24,8 @@ public:
 	PuzzleWord * const GetPuzzleWord(int index) const;
 	PuzzleWord * const GetSelectedPuzzleWord() const;
 
-	void OnClickEvent();
-	void OnMouseMoveEvent(COORD cursorCoord);
+	void OnClickEvent(const COORD& cursorCoord);
+	void OnMouseMoveEvent(const COORD& cursorCoord);
 
 	const DifficultyLevel * const GetCurrentDifficulty() const;
 

@@ -23,7 +23,6 @@ HackingController::HackingController(HackingModel* hackingModel, HackingView* ha
 	assert(hackingModel != nullptr);
 	assert(hackingView != nullptr);
 
-
 	this->hackingModel = hackingModel;
 	this->hackingView = hackingView;
 
@@ -37,31 +36,40 @@ HackingController::HackingController(HackingModel* hackingModel, HackingView* ha
 
 HackingController::~HackingController()
 {
+	CloseHandle(this->inputHandle);
+	CloseHandle(this->outputHandle);
 }
 
 void HackingController::Run()
 {
+	bool done = false;
+
 	SetConsoleActiveScreenBuffer(this->inputHandle);
 	DWORD flags;
 	GetConsoleMode(this->inputHandle, &flags);
 
 	DWORD fdwMode = flags & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
-	assert(SetConsoleMode(inputHandle, fdwMode));
+	if (!SetConsoleMode(inputHandle, fdwMode))
+	{
+		done = true;
+	}
 
-	bool done = false;
+	CONSOLE_CURSOR_INFO cursorInfo;
+	cursorInfo.bVisible = FALSE;
+	cursorInfo.dwSize = 100;
+	SetConsoleCursorInfo(this->outputHandle, &cursorInfo);
 
 	while (!done)
 	{
 		const int INPUT_BUFFER_SIZE = 255;
-		INPUT_RECORD inputBuffer[INPUT_BUFFER_SIZE];
+		INPUT_RECORD eventBuffer[INPUT_BUFFER_SIZE];
 		DWORD eventsRead;
 
-		if (ReadConsoleInput(inputHandle, inputBuffer, INPUT_BUFFER_SIZE, &eventsRead))
+		if (ReadConsoleInput(inputHandle, eventBuffer, INPUT_BUFFER_SIZE, &eventsRead))
 		{
-			unsigned int index = 0;
-			while (index < eventsRead)
+			for (unsigned int eventIndex = 0; eventIndex < eventsRead; ++eventIndex)
 			{
-				INPUT_RECORD* record = &inputBuffer[index];
+				INPUT_RECORD* record = &eventBuffer[eventIndex];
 				if (record->EventType == MOUSE_EVENT)
 				{
 					cursorCoord = record->Event.MouseEvent.dwMousePosition;
@@ -72,7 +80,7 @@ void HackingController::Run()
 
 					if (record->Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
 					{
-						this->hackingModel->OnClickEvent();
+						this->hackingModel->OnClickEvent(this->cursorCoord);
 					}
 				}
 
@@ -85,19 +93,10 @@ void HackingController::Run()
 						done = true;
 					}
 				}
-				++index;
 			}
 		}
 
 		this->hackingView->Render(this->cursorCoord);
-
-		SetConsoleCursorPosition(outputHandle, GetOutputCursorCoord());
 		Sleep(1000 / 24);
 	}
-}
-
-COORD HackingController::GetOutputCursorCoord()
-{
-	COORD c = { TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1, TOTAL_SCREEN_HEIGHT - 1 };
-	return c;
 }
