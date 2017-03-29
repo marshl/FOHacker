@@ -6,7 +6,7 @@
 class DifficultyLevel
 {
 public:
-	DifficultyLevel(int rank, std::string name, int wordCount, int wordLength, int letterDifference);
+	DifficultyLevel(int rank, std::string name, int wordCount, int wordLength, int letterDifference, int startingAttemptCount);
 	~DifficultyLevel();
 
 	int GetRank() const;
@@ -14,6 +14,7 @@ public:
 	int GetWordCount() const;
 	int GetWordLength() const;
 	int GetLetterDifference() const;
+	int GetStartingAttemptCount() const;
 
 private:
 
@@ -22,6 +23,7 @@ private:
 	int wordCount;
 	int wordLength;
 	int letterDifference;
+	int startingAttemptCount;
 };
 
 #endif
