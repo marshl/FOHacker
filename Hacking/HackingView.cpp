@@ -6,14 +6,14 @@
 #include "constants.h"
 #include "HackingModel.h"
 #include "PuzzleWord.h"
+#include "DifficultyLevel.h"
 
 
-HackingView::HackingView(HackingModel* hackingModel)
+HackingView::HackingView(const HackingModel * const hackingModel) : hackingModel(hackingModel)
 {
 	assert(hackingModel != nullptr);
-	this->hackingModel = hackingModel;
 
-	this->displayBuffer = new CHAR_INFO[TOTAL_SCREEN_HEIGHT * TOTAL_SCREEN_WIDTH];
+	this->displayBuffer.resize(TOTAL_SCREEN_HEIGHT * TOTAL_SCREEN_WIDTH);
 
 	this->characterBuffer.resize(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
 	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
@@ -24,17 +24,28 @@ HackingView::HackingView(HackingModel* hackingModel)
 
 HackingView::~HackingView()
 {
-	delete this->displayBuffer;
 }
 
 void HackingView::Render(COORD cursorCoord)
 {
 	this->ClearBuffer();
 	this->RefreshBuffer(cursorCoord);
-	this->SwapBuffers();
+
+	const WORD NORMAL_CHAR_ATTRIBUTES = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	const WORD HIGHLIGHTED_CHAR_ATTRIBUTES = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
+
+	for (unsigned int y = 0; y < TOTAL_SCREEN_HEIGHT; ++y)
+	{
+		for (unsigned int x = 0; x < TOTAL_SCREEN_WIDTH; ++x)
+		{
+			const int index = y * TOTAL_SCREEN_WIDTH + x;
+			displayBuffer[index].Char.AsciiChar = this->characterBuffer[y][x];
+			displayBuffer[index].Attributes = this->highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
+		}
+	}
 
 	SMALL_RECT AREA_RECT = { ORIGIN_COORD.X, ORIGIN_COORD.Y, TOTAL_SCREEN_WIDTH, TOTAL_SCREEN_HEIGHT };
-	WriteConsoleOutput(outputHandle, this->displayBuffer, TOTAL_SIZE_COORD, ORIGIN_COORD, &AREA_RECT);
+	WriteConsoleOutput(outputHandle, this->displayBuffer.data(), TOTAL_SIZE_COORD, ORIGIN_COORD, &AREA_RECT);
 }
 
 void HackingView::SetOutputHandle(HANDLE handle)
@@ -42,26 +53,12 @@ void HackingView::SetOutputHandle(HANDLE handle)
 	this->outputHandle = handle;
 }
 
-
 void HackingView::ClearBuffer()
 {
 	this->characterBuffer.clear();
 	this->characterBuffer.resize(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
 	this->highlightBuffer.clear();
 	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
-}
-
-void HackingView::SwapBuffers()
-{
-	for (unsigned int y = 0; y < TOTAL_SCREEN_HEIGHT; ++y)
-	{
-		for (unsigned int x = 0; x < TOTAL_SCREEN_WIDTH; ++x)
-		{
-			int index = y * TOTAL_SCREEN_WIDTH + x;
-			displayBuffer[index].Char.AsciiChar = this->characterBuffer[y][x];
-			displayBuffer[index].Attributes = this->highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
-		}
-	}
 }
 
 void HackingView::RefreshBuffer(COORD cursorCoord)
@@ -100,7 +97,7 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 
 	std::ostringstream outstr;
 	outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
-	this->RenderText({ 0, INTRO_LINE_COUNT + 1 }, outstr.str());
+	this->RenderText({ 0, INTRO_LINE_COUNT + 1 }, outstr.str(), false);
 
 	for (int x = 0; x < COLUMN_COUNT; ++x)
 	{
@@ -108,13 +105,13 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 		{
 			const std::string& hexCode = this->hackingModel->GetHexAddress(x * COLUMN_HEIGHT + y);
 			COORD coord = { (short)(x*TOTAL_COLUMN_WIDTH), (short)(y + LINES_BEFORE_COLUMNS) };
-			this->RenderText(coord, hexCode);
+			this->RenderText(coord, hexCode, false);
 		}
 	}
 
 	for (unsigned int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i)
 	{
-		for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
+		for (int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j)
 		{
 			const PuzzleWord * const puzzleWord = this->hackingModel->GetPuzzleWord(i);
 			COORD coord = puzzleWord->GetScreenCoord(j);
@@ -141,7 +138,7 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 
 		if (puzzleWord->IsHighlighted())
 		{
-			for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
+			for (int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j)
 			{
 				COORD& pos = puzzleWord->GetScreenCoord(j);
 				this->highlightBuffer[pos.Y][pos.X] = true;
@@ -161,7 +158,7 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 	else
 	{
 		std::ostringstream outstr;
-		outstr << "> " << std::string(PUZZLE_WORD_LENGTH, ' ');
+		outstr << "> ";
 
 		this->characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
 			outstr.str().length(),
@@ -171,13 +168,14 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 	this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
 }
 
-void HackingView::RenderText(COORD position, std::string text)
+void HackingView::RenderText(COORD position, std::string text, bool isHighlighted)
 {
+	this->characterBuffer[position.Y].replace(position.X, text.size(), text);
 	for (unsigned int i = 0; i < text.size(); ++i)
 	{
-		this->characterBuffer[position.Y].replace(position.X, text.size(), text);
+		this->highlightBuffer[position.Y][position.X + i] = isHighlighted;
 	}
-}}
+}
 
 bool HackingView::IsCoordInString(const COORD & coord, const COORD & textPosition, int textLength) const
 {

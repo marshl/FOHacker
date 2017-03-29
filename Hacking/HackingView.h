@@ -10,7 +10,7 @@ class HackingModel;
 class HackingView
 {
 public:
-	HackingView(HackingModel* hackingModel);
+	HackingView(const HackingModel * const hackingModel);
 	~HackingView();
 
 	void Render(COORD cursorCoord);
@@ -18,9 +18,9 @@ public:
 	void SetOutputHandle(HANDLE handle);
 
 private:
-	HackingModel* hackingModel;
+	const HackingModel * const hackingModel;
 
-	CHAR_INFO* displayBuffer;
+	std::vector<CHAR_INFO> displayBuffer;
 
 	std::vector<std::string> characterBuffer;
 	std::vector<std::vector<bool> > highlightBuffer;
@@ -30,14 +30,13 @@ private:
 	HANDLE outputHandle;
 
 	void ClearBuffer();
-	void SwapBuffers();
 
 	void RefreshBuffer(COORD cursorCoord);
 
 	void RenderDifficultyScreen(COORD cursorCoord);
 	void RenderGameScreen(COORD cursorCoord);
 
-	void RenderText(COORD position, std::string text);
+	void RenderText(COORD position, std::string text, bool isHighlighted);
 
 	bool IsCoordInString(const COORD & coord, const COORD & textPosition, int textLength) const;
 

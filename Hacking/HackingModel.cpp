@@ -14,17 +14,15 @@
 
 HackingModel::HackingModel()
 {
-	this->attemptsRemaining = STARTING_ATTEMPT_COUNT;
-
-
 	this->currentHighlightedPuzzleWord = nullptr;
 	this->currentDifficulty = nullptr;
 
-	this->SetPuzzleWords();
-	this->PlacePuzzleWords();
 	this->SetHexAddresses();
 
 	this->InitialiseDifficultyLevels();
+
+	const std::string FILLER_CHARACTERS = "$-/?|=+&^%!@#&*{}[]()<>,.'\"";
+	const int FILLER_CHARACTER_COUNT = FILLER_CHARACTERS.length();
 
 	for (int i = 0; i < TOTAL_COLUMN_LINE_COUNT; ++i)
 	{
@@ -101,25 +99,32 @@ void HackingModel::OnClickEvent(const COORD& cursorCoord)
 
 void HackingModel::OnMouseMoveEvent(const COORD& cursorCoord)
 {
-	this->currentHighlightedPuzzleWord = nullptr;
-
-	for (unsigned int i = 0; i < puzzleWords.size(); ++i)
+	if (this->currentDifficulty == nullptr)
 	{
-		this->puzzleWords[i]->SetHighlight(false);
+
 	}
-
-	for (unsigned int i = 0; i < this->puzzleWords.size() && this->currentHighlightedPuzzleWord == nullptr; ++i)
+	else
 	{
-		PuzzleWord* word = this->puzzleWords[i];
+		this->currentHighlightedPuzzleWord = nullptr;
 
-		for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
+		for (unsigned int i = 0; i < puzzleWords.size(); ++i)
 		{
-			if (word->GetScreenCoord(j).X == cursorCoord.X
-				&& word->GetScreenCoord(j).Y == cursorCoord.Y)
+			this->puzzleWords[i]->SetHighlight(false);
+		}
+
+		for (unsigned int i = 0; i < this->puzzleWords.size() && this->currentHighlightedPuzzleWord == nullptr; ++i)
+		{
+			PuzzleWord* word = this->puzzleWords[i];
+
+			for (int j = 0; j < this->GetCurrentDifficulty()->GetWordLength(); ++j)
 			{
-				word->SetHighlight(true);
-				this->currentHighlightedPuzzleWord = word;
-				break;
+				if (word->GetScreenCoord(j).X == cursorCoord.X
+					&& word->GetScreenCoord(j).Y == cursorCoord.Y)
+				{
+					word->SetHighlight(true);
+					this->currentHighlightedPuzzleWord = word;
+					break;
+				}
 			}
 		}
 	}
@@ -133,6 +138,11 @@ const DifficultyLevel * const HackingModel::GetCurrentDifficulty() const
 const DifficultyLevel * const HackingModel::GetDifficultyLevelWithIndex(int index) const
 {
 	return this->difficultyLevels[index];
+}
+
+unsigned int HackingModel::GetDifficultyCount() const
+{
+	return this->difficultyLevels.size();
 }
 
 void HackingModel::SetDifficultyLevel(DifficultyLevel* difficultyLevel)
@@ -164,7 +174,7 @@ void HackingModel::SetPuzzleWords()
 
 	this->GetSampleWordList(allWords);
 
-	assert(allWords.size() >= WORD_COUNT);
+	assert((int)allWords.size() >= this->GetCurrentDifficulty()->GetWordCount());
 
 	std::random_shuffle(allWords.begin(), allWords.end());
 
@@ -184,7 +194,7 @@ void HackingModel::SetPuzzleWords()
 			for each(const std::string& solutionWord in solutionWords)
 			{
 				int difference = StringDiff(solutionWord, randWord);
-				if (difference > PUZZLE_DIFFERENCE || difference == 0)
+				if (difference > this->GetCurrentDifficulty()->GetLetterDifference() || difference == 0)
 				{
 					continue;
 				}
@@ -192,7 +202,7 @@ void HackingModel::SetPuzzleWords()
 				solutionWords.push_back(randWord);
 				wordAdded = true;
 
-				if (solutionWords.size() == WORD_COUNT)
+				if (solutionWords.size() == this->GetCurrentDifficulty()->GetWordCount())
 				{
 					for each(std::string word in solutionWords)
 					{
@@ -221,17 +231,17 @@ void HackingModel::SetPuzzleWords()
 
 void HackingModel::PlacePuzzleWords()
 {
-	assert(TOTAL_COLUMNS_CHARACTER_COUNT > PUZZLE_WORD_LENGTH);
+	assert(TOTAL_COLUMNS_CHARACTER_COUNT > this->GetCurrentDifficulty()->GetWordLength());
 
 	for (unsigned int i = 0; i < puzzleWords.size(); )
 	{
 		// Theoretically, this might go infinite with the right conditions
-		int place = rand() % (TOTAL_COLUMNS_CHARACTER_COUNT - PUZZLE_WORD_LENGTH);
+		int place = rand() % (TOTAL_COLUMNS_CHARACTER_COUNT - this->GetCurrentDifficulty()->GetWordLength());
 		bool badPlacement = false;
 		// Check for position collisions with words that have already been placed
 		for (unsigned int j = 0; j < i; ++j)
 		{
-			if (std::abs(puzzleWords[j]->GetPosition() - place) < PUZZLE_WORD_LENGTH + 1)
+			if (std::abs(puzzleWords[j]->GetPosition() - place) < this->GetCurrentDifficulty()->GetWordLength() + 1)
 			{
 				badPlacement = true;
 				break;
@@ -261,7 +271,7 @@ void HackingModel::PlacePuzzleWords()
 		}
 
 		// If the std::string goes over the end of a line
-		if (x + PUZZLE_WORD_LENGTH > COLUMN_CHARACTER_WIDTH)
+		if (x + this->GetCurrentDifficulty()->GetWordLength() > COLUMN_CHARACTER_WIDTH)
 		{
 			// Separate it into two
 			std::string chunk1 = puzzleWords[i]->GetText().substr(0, COLUMN_CHARACTER_WIDTH - x + 1);
@@ -284,7 +294,7 @@ void HackingModel::PlacePuzzleWords()
 			}
 
 			int k = 0;
-			for (int j = COLUMN_CHARACTER_WIDTH - x + 1; j < PUZZLE_WORD_LENGTH; ++j)
+			for (int j = COLUMN_CHARACTER_WIDTH - x + 1; j < this->GetCurrentDifficulty()->GetWordLength(); ++j)
 			{
 				COORD& coord = puzzleWords[i]->GetScreenCoord(j);
 				coord.X = HEX_CODE_LENGTH + 1 + column * TOTAL_COLUMN_WIDTH + k;
@@ -294,7 +304,7 @@ void HackingModel::PlacePuzzleWords()
 		}
 		else
 		{
-			for (int j = 0; j < PUZZLE_WORD_LENGTH; ++j)
+			for (int j = 0; j < this->GetCurrentDifficulty()->GetWordLength(); ++j)
 			{
 				COORD& coord = puzzleWords[i]->GetScreenCoord(j);
 				coord.X = x + 1 + HEX_CODE_LENGTH + column * TOTAL_COLUMN_WIDTH + j;
@@ -316,12 +326,13 @@ void HackingModel::GetSampleWordList(std::vector<std::string>& _out)
 	std::string word;
 	while (fin >> word)
 	{
-		if (word.length() == PUZZLE_WORD_LENGTH)
+		if (word.length() == this->GetCurrentDifficulty()->GetWordLength())
 		{
 			std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 			_out.push_back(word);
 		}
 	}
+
 	fin.close();
 }
 

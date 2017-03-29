@@ -27,14 +27,14 @@ void PuzzleWord::SetPosition(int position)
 	this->position = position;
 }
 
-const COORD & PuzzleWord::GetScreenCoord(int index) const
+const COORD & PuzzleWord::GetScreenCoord(unsigned int index) const
 {
-	assert(index >= 0 && index < PUZZLE_WORD_LENGTH);
+	assert(index >= 0 && index < this->text.size());
 	return this->screenCoords[index];
 }
 
-COORD & PuzzleWord::GetScreenCoord(int index)
+COORD & PuzzleWord::GetScreenCoord(unsigned int index)
 {
-	assert(index >= 0 && index < PUZZLE_WORD_LENGTH);
+	assert(index >= 0 && index < this->text.size());
 	return this->screenCoords[index];
 }

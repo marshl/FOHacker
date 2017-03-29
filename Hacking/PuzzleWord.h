@@ -25,8 +25,8 @@ public:
 
 	void SetPosition(int position);
 
-	const COORD& GetScreenCoord(int index) const;
-	COORD& GetScreenCoord(int index);
+	const COORD& GetScreenCoord(unsigned int index) const;
+	COORD& GetScreenCoord(unsigned int index);
 
 private:
 	std::string text;

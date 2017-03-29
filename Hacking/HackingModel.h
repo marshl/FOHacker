@@ -30,6 +30,7 @@ public:
 	const DifficultyLevel * const GetCurrentDifficulty() const;
 
 	const DifficultyLevel * const GetDifficultyLevelWithIndex(int index) const;
+	unsigned int GetDifficultyCount() const;
 
 	void SetDifficultyLevel(DifficultyLevel* difficultyLevel);
 
