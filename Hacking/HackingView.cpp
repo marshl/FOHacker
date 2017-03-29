@@ -78,6 +78,16 @@ void HackingView::RefreshBuffer(COORD cursorCoord)
 
 void HackingView::RenderDifficultyScreen(COORD cursorCoord)
 {
+	for (unsigned int i = 0; i < this->hackingModel->GetDifficultyCount(); ++i)
+	{
+		const DifficultyLevel * const difficulty = this->hackingModel->GetDifficultyLevelWithIndex(i);
+
+		COORD textPosition = { (short)(TOTAL_SCREEN_WIDTH - difficulty->GetName().size()) / 2, (short)i * 2 + 5 };
+		bool highlighted = this->IsCoordInString(cursorCoord, textPosition, difficulty->GetName().size());
+
+		this->RenderText(textPosition, difficulty->GetName(), highlighted);
+	}
+
 	this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
 }
 
