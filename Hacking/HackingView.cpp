@@ -167,4 +167,14 @@ void HackingView::RenderText(COORD position, std::string text)
 	{
 		this->characterBuffer[position.Y].replace(position.X, text.size(), text);
 	}
+}}
+
+bool HackingView::IsCoordInString(const COORD & coord, const COORD & textPosition, int textLength) const
+{
+	return coord.Y == textPosition.Y && coord.X >= textPosition.X && coord.X < textPosition.X + textLength;
+}
+
+bool HackingView::IsCoordInArea(const COORD & position, const COORD & start, const COORD & end) const
+{
+	return position.Y >= start.Y && position.X <= end.Y && position.X >= start.X && position.X <= end.X;
 }

@@ -38,6 +38,10 @@ private:
 	void RenderGameScreen(COORD cursorCoord);
 
 	void RenderText(COORD position, std::string text);
+
+	bool IsCoordInString(const COORD & coord, const COORD & textPosition, int textLength) const;
+
+	bool IsCoordInArea(const COORD & position, const COORD & start, const COORD & end) const;
 };
 
 #endif
