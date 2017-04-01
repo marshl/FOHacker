@@ -17,6 +17,12 @@ public:
 
 	void SetOutputHandle(HANDLE handle);
 
+	int GetScreenHeight() const;
+	int GetScreenWidth() const;
+
+	short GetLineCountAboveColumns() const;
+	const std::vector<std::string> GetIntroText() const;
+
 private:
 	const HackingModel * const hackingModel;
 
@@ -24,10 +30,14 @@ private:
 
 	std::vector<std::string> characterBuffer;
 	std::vector<std::vector<bool> > highlightBuffer;
-
 	std::string stringBuffer;
 
+	std::vector<std::string> hexAddresses;
+
 	HANDLE outputHandle;
+
+	int GetTotalColumnWidth() const;
+	int GetHexCodeLength() const;
 
 	void ClearBuffer();
 
@@ -41,6 +51,9 @@ private:
 	bool IsCoordInString(const COORD & coord, const COORD & textPosition, int textLength) const;
 
 	bool IsCoordInArea(const COORD & position, const COORD & start, const COORD & end) const;
+
+
+	void SetHexAddresses();
 };
 
 #endif

@@ -5,8 +5,6 @@
 #include <string>
 #include <boost/container/vector.hpp>
 
-#include "constants.h"
-
 class PuzzleWord
 {
 public:

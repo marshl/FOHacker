@@ -13,7 +13,6 @@
 #include <boost/algorithm/clamp.hpp>
 
 #include "strfunc.h"
-#include "constants.h"
 #include "PuzzleWord.h"
 #include "HackingModel.h"
 #include "HackingView.h"
@@ -78,8 +77,8 @@ void HackingController::Run()
 				if (record->EventType == MOUSE_EVENT)
 				{
 					cursorCoord = record->Event.MouseEvent.dwMousePosition;
-					cursorCoord.X = boost::algorithm::clamp((int)cursorCoord.X, 0, TOTAL_SCREEN_WIDTH - 1);
-					cursorCoord.Y = boost::algorithm::clamp((int)cursorCoord.Y, 0, TOTAL_SCREEN_HEIGHT - 1);
+					cursorCoord.X = boost::algorithm::clamp((int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() - 1);
+					cursorCoord.Y = boost::algorithm::clamp((int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() - 1);
 
 					this->hackingModel->OnMouseMoveEvent(this->cursorCoord);
 

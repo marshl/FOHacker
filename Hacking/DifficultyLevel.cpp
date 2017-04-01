@@ -2,8 +2,6 @@
 
 #include <cassert>
 
-#include "constants.h"
-
 DifficultyLevel::DifficultyLevel(int rank, std::string name, int wordCount, int wordLength, int letterDifference, int startingAttemptCount)
 {
 	this->rank = rank;
@@ -13,7 +11,6 @@ DifficultyLevel::DifficultyLevel(int rank, std::string name, int wordCount, int 
 	this->wordCount = wordCount;
 
 	assert(wordLength > 0);
-	assert(wordLength < LONGEST_PUZZLE_WORD);
 	this->wordLength = wordLength;
 
 	assert(letterDifference > 0 && letterDifference <= wordLength);

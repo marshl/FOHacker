@@ -2,8 +2,8 @@
 
 #include <cassert>
 #include <sstream>
+#include <algorithm>
 
-#include "constants.h"
 #include "HackingModel.h"
 #include "PuzzleWord.h"
 #include "DifficultyLevel.h"
@@ -13,12 +13,16 @@ HackingView::HackingView(const HackingModel * const hackingModel) : hackingModel
 {
 	assert(hackingModel != nullptr);
 
-	this->displayBuffer.resize(TOTAL_SCREEN_HEIGHT * TOTAL_SCREEN_WIDTH);
+	this->displayBuffer.resize(this->GetScreenHeight() * this->GetScreenWidth());
 
-	this->characterBuffer.resize(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
-	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
+	this->characterBuffer.resize(this->GetScreenHeight(), std::string(this->GetScreenWidth(), ' '));
+	this->highlightBuffer.resize(this->GetScreenHeight(), std::vector<bool>(this->GetScreenWidth(), false));
 
-	this->stringBuffer.resize(TOTAL_COLUMNS_CHARACTER_COUNT, '#');
+	this->stringBuffer.resize(this->hackingModel->GetTotalColumnCharacterCount(), '#');
+
+	SetConsoleScreenBufferSize(this->outputHandle, { (short)this->GetScreenWidth(), (short)this->GetScreenHeight() });
+
+	this->SetHexAddresses();
 }
 
 
@@ -34,18 +38,20 @@ void HackingView::Render(COORD cursorCoord)
 	const WORD NORMAL_CHAR_ATTRIBUTES = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 	const WORD HIGHLIGHTED_CHAR_ATTRIBUTES = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 
-	for (unsigned int y = 0; y < TOTAL_SCREEN_HEIGHT; ++y)
+	for (int y = 0; y < this->GetScreenHeight(); ++y)
 	{
-		for (unsigned int x = 0; x < TOTAL_SCREEN_WIDTH; ++x)
+		for (int x = 0; x < this->GetScreenWidth(); ++x)
 		{
-			const int index = y * TOTAL_SCREEN_WIDTH + x;
+			const int index = y * this->GetScreenWidth() + x;
 			displayBuffer[index].Char.AsciiChar = this->characterBuffer[y][x];
 			displayBuffer[index].Attributes = this->highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
 		}
 	}
 
-	SMALL_RECT AREA_RECT = { ORIGIN_COORD.X, ORIGIN_COORD.Y, TOTAL_SCREEN_WIDTH, TOTAL_SCREEN_HEIGHT };
-	WriteConsoleOutput(outputHandle, this->displayBuffer.data(), TOTAL_SIZE_COORD, ORIGIN_COORD, &AREA_RECT);
+	const COORD ORIGIN_COORD = { 0,0 };
+	SMALL_RECT AREA_RECT = { ORIGIN_COORD.X, ORIGIN_COORD.Y, (short)this->GetScreenWidth(), (short)this->GetScreenHeight() };
+	const COORD screenSize = { (short)this->GetScreenWidth(), (short)this->GetScreenHeight() };
+	WriteConsoleOutput(outputHandle, this->displayBuffer.data(), screenSize, ORIGIN_COORD, &AREA_RECT);
 }
 
 void HackingView::SetOutputHandle(HANDLE handle)
@@ -53,12 +59,53 @@ void HackingView::SetOutputHandle(HANDLE handle)
 	this->outputHandle = handle;
 }
 
+int HackingView::GetScreenHeight() const
+{
+	return this->hackingModel->GetColumnHeight() + this->GetLineCountAboveColumns();
+}
+
+int HackingView::GetScreenWidth() const
+{
+	const int COLUMN_CHARACTER_WIDTH = 12;
+	const int HEX_CODE_LENGTH = 6;
+
+	const int ANSWER_AREA_WIDTH = this->hackingModel->GetMaximumWordLength() + 1;
+	const int TOTAL_COLUMN_WIDTH = HEX_CODE_LENGTH + 1 + COLUMN_CHARACTER_WIDTH + 1;
+	const int TOTAL_SCREEN_WIDTH = 80;// TOTAL_COLUMN_WIDTH * COLUMN_COUNT + ANSWER_AREA_WIDTH;
+
+	return 80;
+}
+
+int HackingView::GetTotalColumnWidth() const
+{
+	return this->hackingModel->GetColumnWidth() + 1 + this->GetHexCodeLength() + 1;
+}
+
+int HackingView::GetHexCodeLength() const
+{
+	return 6;
+}
+
+short HackingView::GetLineCountAboveColumns() const
+{
+	return 3;
+}
+
+const std::vector<std::string> HackingView::GetIntroText() const
+{
+	return
+		std::vector<std::string>{
+		"ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL",
+			"!!!! WARNING: LOCKOUT IMMINENT !!!!",
+	};
+}
+
 void HackingView::ClearBuffer()
 {
 	this->characterBuffer.clear();
-	this->characterBuffer.resize(TOTAL_SCREEN_HEIGHT, std::string(TOTAL_SCREEN_WIDTH, ' '));
+	this->characterBuffer.resize(this->GetScreenHeight(), std::string(this->GetScreenWidth(), ' '));
 	this->highlightBuffer.clear();
-	this->highlightBuffer.resize(TOTAL_SCREEN_HEIGHT, std::vector<bool>(TOTAL_SCREEN_WIDTH, false));
+	this->highlightBuffer.resize(this->GetScreenHeight(), std::vector<bool>(this->GetScreenWidth(), false));
 }
 
 void HackingView::RefreshBuffer(COORD cursorCoord)
@@ -75,11 +122,11 @@ void HackingView::RefreshBuffer(COORD cursorCoord)
 
 void HackingView::RenderDifficultyScreen(COORD cursorCoord)
 {
-	for (unsigned int i = 0; i < this->hackingModel->GetDifficultyCount(); ++i)
+	for (int i = 0; i < this->hackingModel->GetDifficultyCount(); ++i)
 	{
 		const DifficultyLevel * const difficulty = this->hackingModel->GetDifficultyLevelWithIndex(i);
 
-		COORD textPosition = { (short)(TOTAL_SCREEN_WIDTH - difficulty->GetName().size()) / 2, (short)i * 2 + 5 };
+		COORD textPosition = { (short)(this->GetScreenWidth() - difficulty->GetName().size()) / 2, (short)i * 2 + 5 };
 		bool highlighted = this->IsCoordInString(cursorCoord, textPosition, difficulty->GetName().size());
 
 		this->RenderText(textPosition, difficulty->GetName(), highlighted);
@@ -90,26 +137,26 @@ void HackingView::RenderDifficultyScreen(COORD cursorCoord)
 
 void HackingView::RenderGameScreen(COORD cursorCoord)
 {
-	for (int i = 0; i < INTRO_LINE_COUNT; ++i)
+	for (int i = 0; i < (int)this->GetIntroText().size(); ++i)
 	{
-		this->characterBuffer[i].replace(0, introLines[i].size(), introLines[i]);
+		this->characterBuffer[i].replace(0, this->GetIntroText()[i].size(), this->GetIntroText()[i]);
 	}
 
 	std::ostringstream outstr;
 	outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
-	this->RenderText({ 0, INTRO_LINE_COUNT + 1 }, outstr.str(), false);
+	this->RenderText({ 0, this->GetLineCountAboveColumns() + 1 }, outstr.str(), false);
 
-	for (int x = 0; x < COLUMN_COUNT; ++x)
+	for (int x = 0; x < this->hackingModel->GetColumnCount(); ++x)
 	{
-		for (int y = 0; y < COLUMN_HEIGHT; ++y)
+		for (int y = 0; y < this->hackingModel->GetColumnWidth(); ++y)
 		{
-			const std::string& hexCode = this->hackingModel->GetHexAddress(x * COLUMN_HEIGHT + y);
-			COORD coord = { (short)(x*TOTAL_COLUMN_WIDTH), (short)(y + LINES_BEFORE_COLUMNS) };
+			const std::string& hexCode = this->hexAddresses[x * this->hackingModel->GetColumnHeight() + y];
+			COORD coord = { (short)(x * this->GetTotalColumnWidth()), (short)(y + this->GetLineCountAboveColumns()) };
 			this->RenderText(coord, hexCode, false);
 		}
 	}
 
-	for (unsigned int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i)
+	for (int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i)
 	{
 		for (int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j)
 		{
@@ -119,20 +166,20 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 		}
 	}
 
-	for (unsigned int y = 0; y < TOTAL_SCREEN_HEIGHT; ++y)
+	for (int y = 0; y < this->GetScreenHeight(); ++y)
 	{
-		for (unsigned int x = 0; x < TOTAL_SCREEN_WIDTH; ++x)
+		for (int x = 0; x < this->GetScreenWidth(); ++x)
 		{
 			this->highlightBuffer[y][x] = false;
 		}
 	}
 
-	for (unsigned int i = 0; i < this->hackingModel->GetAttemptedWordCount(); ++i)
+	for (int i = 0; i < this->hackingModel->GetAttemptedWordCount(); ++i)
 	{
 
 	}
 
-	for (unsigned int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i)
+	for (int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i)
 	{
 		PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWord(i);
 
@@ -151,7 +198,7 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 		std::ostringstream outstr;
 		outstr << "> " << this->hackingModel->GetSelectedPuzzleWord()->GetText();
 
-		this->characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
+		this->characterBuffer[this->GetScreenHeight() - 1].replace(this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1,
 			outstr.str().length(),
 			outstr.str());
 	}
@@ -160,7 +207,7 @@ void HackingView::RenderGameScreen(COORD cursorCoord)
 		std::ostringstream outstr;
 		outstr << "> ";
 
-		this->characterBuffer[TOTAL_SCREEN_HEIGHT - 1].replace(TOTAL_COLUMN_WIDTH * COLUMN_COUNT + 1,
+		this->characterBuffer[this->GetScreenHeight() - 1].replace(this->GetTotalColumnWidth()* this->hackingModel->GetColumnCount() + 1,
 			outstr.str().length(),
 			outstr.str());
 	}
@@ -185,4 +232,20 @@ bool HackingView::IsCoordInString(const COORD & coord, const COORD & textPositio
 bool HackingView::IsCoordInArea(const COORD & position, const COORD & start, const COORD & end) const
 {
 	return position.Y >= start.Y && position.X <= end.Y && position.X >= start.X && position.X <= end.X;
+}
+
+
+void HackingView::SetHexAddresses()
+{
+	this->hexAddresses.resize(this->hackingModel->GetTotalLineCount(), std::string(this->GetHexCodeLength(), '#'));
+
+	int address = rand() % 0xF000 + 0xFFF;
+	for (int i = 0; i < this->hackingModel->GetTotalLineCount(); ++i)
+	{
+		address += sizeof(char) * this->GetTotalColumnWidth();
+		std::ostringstream stream;
+		stream << "0x" << std::hex << address;
+		hexAddresses[i] = stream.str();
+		std::transform(hexAddresses[i].begin() + 2, hexAddresses[i].end(), hexAddresses[i].begin() + 2, ::toupper);
+	}
 }

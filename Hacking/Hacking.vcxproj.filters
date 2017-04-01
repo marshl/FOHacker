@@ -41,9 +41,6 @@
     <ClInclude Include="strfunc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PuzzleWord.h">
       <Filter>Header Files</Filter>
     </ClInclude>

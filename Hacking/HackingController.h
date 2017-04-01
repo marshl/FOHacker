@@ -5,8 +5,6 @@
 #include <vector>
 #include <string>
 
-#include "constants.h"
-
 class HackingModel;
 class HackingView;
 class PuzzleWord;

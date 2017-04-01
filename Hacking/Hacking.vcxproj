@@ -79,7 +79,6 @@
     <ClCompile Include="strfunc.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="constants.h" />
     <ClInclude Include="DifficultyLevel.h" />
     <ClInclude Include="HackingController.h" />
     <ClInclude Include="HackingModel.h" />

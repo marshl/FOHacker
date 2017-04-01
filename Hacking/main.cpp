@@ -2,7 +2,6 @@
 #include <ctime>
 
 #include "strfunc.h"
-#include "constants.h"
 #include "PuzzleWord.h"
 #include "HackingController.h"
 #include "HackingModel.h"
