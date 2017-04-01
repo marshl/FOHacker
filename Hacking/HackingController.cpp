@@ -26,8 +26,13 @@ HackingController::HackingController(HackingModel* hackingModel, HackingView* ha
 	this->hackingModel = hackingModel;
 	this->hackingView = hackingView;
 
-	this->inputHandle = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-	this->outputHandle = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+	if (!AllocConsole())
+	{
+		exit(1);
+	}
+
+	this->inputHandle = GetStdHandle(STD_INPUT_HANDLE);
+	this->outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	this->hackingView->SetOutputHandle(outputHandle);
 
