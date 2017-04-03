@@ -25,13 +25,8 @@ HackingController::HackingController(HackingModel* hackingModel, HackingView* ha
 	this->hackingModel = hackingModel;
 	this->hackingView = hackingView;
 
-	if (!AllocConsole())
-	{
-		exit(1);
-	}
-
-	this->inputHandle = GetStdHandle(STD_INPUT_HANDLE);
-	this->outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	this->inputHandle = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+	this->outputHandle = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 
 	this->hackingView->SetOutputHandle(outputHandle);
 
@@ -58,10 +53,33 @@ void HackingController::Run()
 		done = true;
 	}
 
+	SetConsoleTitle("Hacking");
+
+    // Remove blinking cursor
 	CONSOLE_CURSOR_INFO cursorInfo;
 	cursorInfo.bVisible = FALSE;
-	cursorInfo.dwSize = 100;
+	cursorInfo.dwSize = 100; // Yes, the size needs to be set
 	SetConsoleCursorInfo(this->outputHandle, &cursorInfo);
+
+    // Resize window to fix View size
+	SMALL_RECT tmp = { 0, 0, (short)this->hackingView->GetScreenWidth() - 1, (short)this->hackingView->GetScreenHeight() - 1 };
+	SetConsoleWindowInfo(this->outputHandle, TRUE, &tmp);
+
+    // Remove scrollbars
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(this->outputHandle, &csbi);
+	COORD scrollbar = {
+		csbi.srWindow.Right - csbi.srWindow.Left + 1,
+		csbi.srWindow.Bottom - csbi.srWindow.Top + 1
+	};
+	SetConsoleScreenBufferSize(this->outputHandle, scrollbar);
+
+    // Remove minimuze/maximise buttons, and prevent resizing
+    HWND hwnd = GetConsoleWindow();
+    long dwStyle;
+    dwStyle = GetWindowLong( hwnd, GWL_STYLE );
+    dwStyle ^= WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
+    SetWindowLong( hwnd, GWL_STYLE, dwStyle );
 
 	while (!done)
 	{
