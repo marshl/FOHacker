@@ -23,7 +23,7 @@ public:
     int GetScreenHeight() const;
     int GetScreenWidth() const;
 
-    short GetLineCountAboveColumns() const;
+    int GetLineCountAboveColumns() const;
     const std::vector<std::string> GetIntroText() const;
 
     DifficultyLevel * GetDifficultyAtCoord( COORD coord ) const;
@@ -60,6 +60,8 @@ private:
     void SetHexAddresses();
 
     COORD LetterPositionToCoord( LetterPosition letterPos ) const;
+
+    bool IsCoordInPuzzleWord( COORD coord, PuzzleWord* puzzleWord );
 };
 
 #endif

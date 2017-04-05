@@ -23,7 +23,6 @@ public:
     PuzzleWord * const GetSelectedPuzzleWord() const;
 
     void OnClickEvent( const COORD& cursorCoord );
-    void OnMouseMoveEvent( const COORD& cursorCoord );
 
     DifficultyLevel * GetCurrentDifficulty() const;
 

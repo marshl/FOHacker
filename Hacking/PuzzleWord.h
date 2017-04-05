@@ -17,16 +17,12 @@ struct LetterPosition
 class PuzzleWord
 {
 public:
-    PuzzleWord( std::string _text ) : text( _text ), isHighlighted( false ), isRemoved( false ), position( -1 )
+    PuzzleWord( std::string _text ) : text( _text ), isRemoved( false ), position( -1 )
     {
         this->letterPositions.resize( _text.length(), {0, 0} );
     }
 
     const std::string& GetText() const;
-
-    bool IsHighlighted() const;
-
-    void SetHighlight( bool isHighlighted );
 
     const int GetPosition() const;
 
@@ -38,7 +34,6 @@ public:
 
 private:
     std::string text;
-    bool isHighlighted;
     bool isRemoved;
     int position;
 

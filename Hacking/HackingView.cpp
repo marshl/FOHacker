@@ -80,7 +80,7 @@ int HackingView::GetHexCodeLength() const
     return 6;
 }
 
-short HackingView::GetLineCountAboveColumns() const
+int HackingView::GetLineCountAboveColumns() const
 {
     return 3 + this->GetIntroText().size();
 }
@@ -154,7 +154,7 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 
     std::ostringstream outstr;
     outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
-    this->RenderText( {0, (short)this->GetIntroText().size() + 1}, outstr.str(), false );
+    this->RenderText( {0, ( short )this->GetIntroText().size() + 1}, outstr.str(), false );
 
     for ( int x = 0; x < this->hackingModel->GetColumnCount(); ++x )
     {
@@ -190,19 +190,19 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 
     }
 
-    /*for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
+    for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
     {
         PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWord( i );
 
-        if ( puzzleWord->IsHighlighted() )
+        if ( this->IsCoordInPuzzleWord( cursorCoord, puzzleWord ) )
         {
             for ( int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j )
             {
-                COORD& pos = puzzleWord->GetScreenCoord( j );
+                COORD& pos = this->LetterPositionToCoord( puzzleWord->GetLetterPosition( j ) );
                 this->highlightBuffer[pos.Y][pos.X] = true;
             }
         }
-    }*/
+    }
 
     if ( this->hackingModel->GetSelectedPuzzleWord() != nullptr )
     {
@@ -266,4 +266,18 @@ COORD HackingView::LetterPositionToCoord( LetterPosition letterPos ) const
     int xpos = letterPos.x + letterPos.column * this->GetTotalColumnWidth() + this->GetHexCodeLength() + 1;
     int ypos = letterPos.y + this->GetLineCountAboveColumns();
     return{(short)xpos, (short)ypos};
+}
+
+bool HackingView::IsCoordInPuzzleWord( COORD coord, PuzzleWord * puzzleWord )
+{
+    for ( int i = 0; i < (int)puzzleWord->GetText().size(); ++i )
+    {
+        COORD c = this->LetterPositionToCoord( puzzleWord->GetLetterPosition( i ) );
+        if ( c.X == coord.X && c.Y == coord.Y )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }

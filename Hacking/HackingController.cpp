@@ -62,7 +62,7 @@ void HackingController::Run()
     SetConsoleCursorInfo( this->outputHandle, &cursorInfo );
 
     // Resize window to fix View size
-    SMALL_RECT tmp = {0, 0, ( short )this->hackingView->GetScreenWidth() - 1, ( short )this->hackingView->GetScreenHeight() - 1};
+    SMALL_RECT tmp = {0, 0, ( short )this->hackingView->GetScreenWidth(), ( short )this->hackingView->GetScreenHeight()};
     SetConsoleWindowInfo( this->outputHandle, TRUE, &tmp );
 
     // Remove scrollbars
@@ -95,10 +95,8 @@ void HackingController::Run()
                 if ( record->EventType == MOUSE_EVENT )
                 {
                     cursorCoord = record->Event.MouseEvent.dwMousePosition;
-                    cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() );
-                    cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() );
-
-                    this->hackingModel->OnMouseMoveEvent( this->cursorCoord );
+                    cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() - 1 );
+                    cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() - 1 );
 
                     if ( record->Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED )
                     {

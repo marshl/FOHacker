@@ -89,39 +89,6 @@ void HackingModel::OnClickEvent( const COORD& cursorCoord )
     }
 }
 
-void HackingModel::OnMouseMoveEvent( const COORD& cursorCoord )
-{
-    if ( this->currentDifficulty == nullptr )
-    {
-
-    }
-    else
-    {
-        this->currentHighlightedPuzzleWord = nullptr;
-
-        for ( unsigned int i = 0; i < puzzleWords.size(); ++i )
-        {
-            this->puzzleWords[i]->SetHighlight( false );
-        }
-
-        for ( unsigned int i = 0; i < this->puzzleWords.size() && this->currentHighlightedPuzzleWord == nullptr; ++i )
-        {
-            PuzzleWord* word = this->puzzleWords[i];
-
-            /*for ( int j = 0; j < this->GetCurrentDifficulty()->GetWordLength(); ++j )
-            {
-                if ( word->GetScreenCoord( j ).X == cursorCoord.X
-                    && word->GetScreenCoord( j ).Y == cursorCoord.Y )
-                {
-                    word->SetHighlight( true );
-                    this->currentHighlightedPuzzleWord = word;
-                    break;
-                }
-            }*/
-        }
-    }
-}
-
 DifficultyLevel * HackingModel::GetCurrentDifficulty() const
 {
     return this->currentDifficulty;
