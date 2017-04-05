@@ -4,37 +4,37 @@
 
 const std::string & PuzzleWord::GetText() const
 {
-	return this->text;
+    return this->text;
 }
 
 bool PuzzleWord::IsHighlighted() const
 {
-	return this->isHighlighted;
+    return this->isHighlighted;
 }
 
-void PuzzleWord::SetHighlight(bool isHighlighted)
+void PuzzleWord::SetHighlight( bool isHighlighted )
 {
-	this->isHighlighted = isHighlighted;
+    this->isHighlighted = isHighlighted;
 }
 
 const int PuzzleWord::GetPosition() const
 {
-	return this->position;
+    return this->position;
 }
 
-void PuzzleWord::SetPosition(int position)
+void PuzzleWord::SetPosition( int position )
 {
-	this->position = position;
+    this->position = position;
 }
 
-const COORD & PuzzleWord::GetScreenCoord(unsigned int index) const
+const COORD & PuzzleWord::GetScreenCoord( unsigned int index ) const
 {
-	assert(index >= 0 && index < this->text.size());
-	return this->screenCoords[index];
+    assert( index >= 0 && index < this->text.size() );
+    return this->screenCoords[index];
 }
 
-COORD & PuzzleWord::GetScreenCoord(unsigned int index)
+COORD & PuzzleWord::GetScreenCoord( unsigned int index )
 {
-	assert(index >= 0 && index < this->text.size());
-	return this->screenCoords[index];
+    assert( index >= 0 && index < this->text.size() );
+    return this->screenCoords[index];
 }

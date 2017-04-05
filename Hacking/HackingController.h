@@ -12,19 +12,19 @@ class PuzzleWord;
 class HackingController
 {
 public:
-	HackingController(HackingModel* hackingModel, HackingView* hackingView);
-	~HackingController();
+    HackingController( HackingModel* hackingModel, HackingView* hackingView );
+    ~HackingController();
 
-	void Run();
+    void Run();
 
 private:
-	HackingView* hackingView;
-	HackingModel* hackingModel;
+    HackingView* hackingView;
+    HackingModel* hackingModel;
 
-	COORD cursorCoord;
+    COORD cursorCoord;
 
-	HANDLE inputHandle;
-	HANDLE outputHandle;
+    HANDLE inputHandle;
+    HANDLE outputHandle;
 };
 
 #endif

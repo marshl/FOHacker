@@ -11,52 +11,52 @@ class DifficultyLevel;
 class HackingModel
 {
 public:
-	HackingModel();
-	~HackingModel();
+    HackingModel();
+    ~HackingModel();
 
-	int GetAttemptsRemaining() const;
+    int GetAttemptsRemaining() const;
 
-	const int GetPuzzleWordCount() const;
-	const int GetAttemptedWordCount() const;
+    const int GetPuzzleWordCount() const;
+    const int GetAttemptedWordCount() const;
 
-	PuzzleWord * const GetPuzzleWord(int index) const;
-	PuzzleWord * const GetSelectedPuzzleWord() const;
+    PuzzleWord * const GetPuzzleWord( int index ) const;
+    PuzzleWord * const GetSelectedPuzzleWord() const;
 
-	void OnClickEvent(const COORD& cursorCoord);
-	void OnMouseMoveEvent(const COORD& cursorCoord);
+    void OnClickEvent( const COORD& cursorCoord );
+    void OnMouseMoveEvent( const COORD& cursorCoord );
 
-	const DifficultyLevel * const GetCurrentDifficulty() const;
+    const DifficultyLevel * const GetCurrentDifficulty() const;
 
-	const DifficultyLevel * const GetDifficultyLevelWithIndex(int index) const;
-	int GetDifficultyCount() const;
+    const DifficultyLevel * const GetDifficultyLevelWithIndex( int index ) const;
+    int GetDifficultyCount() const;
 
-	void SetDifficultyLevel(int index);
+    void SetDifficultyLevel( int index );
 
-	const int GetColumnWidth() const;
-	const int GetColumnHeight() const;
-	const int GetColumnCount() const;
-	const int GetTotalLineCount() const;
-	const int GetTotalColumnCharacterCount() const;
+    const int GetColumnWidth() const;
+    const int GetColumnHeight() const;
+    const int GetColumnCount() const;
+    const int GetTotalLineCount() const;
+    const int GetTotalColumnCharacterCount() const;
 
-	const int GetMaximumWordLength() const;
+    const int GetMaximumWordLength() const;
 
 private:
-	int attemptsRemaining;
+    int attemptsRemaining;
 
-	std::string solutionWord;
-	std::vector<PuzzleWord*> puzzleWords;
-	std::vector<std::string> attemptedWords;
-	std::vector<DifficultyLevel*> difficultyLevels;
-	std::vector<std::string> fillerCharacters;
+    std::string solutionWord;
+    std::vector<PuzzleWord*> puzzleWords;
+    std::vector<std::string> attemptedWords;
+    std::vector<DifficultyLevel*> difficultyLevels;
+    std::vector<std::string> fillerCharacters;
 
-	DifficultyLevel* currentDifficulty;
+    DifficultyLevel* currentDifficulty;
 
-	PuzzleWord* currentHighlightedPuzzleWord;
+    PuzzleWord* currentHighlightedPuzzleWord;
 
-	void SetPuzzleWords();
-	void PlacePuzzleWords();
-	void GetSampleWordList(std::vector<std::string>& _out);
-	void InitialiseDifficultyLevels();
+    void SetPuzzleWords();
+    void PlacePuzzleWords();
+    void GetSampleWordList( std::vector<std::string>& _out );
+    void InitialiseDifficultyLevels();
 };
 
 #endif

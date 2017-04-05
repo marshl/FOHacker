@@ -2,23 +2,23 @@
 
 #include <cassert>
 
-DifficultyLevel::DifficultyLevel(int rank, std::string name, int wordCount, int wordLength, int letterDifference, int startingAttemptCount)
+DifficultyLevel::DifficultyLevel( int rank, std::string name, int wordCount, int wordLength, int letterDifference, int startingAttemptCount )
 {
-	this->rank = rank;
-	this->name = name;
+    this->rank = rank;
+    this->name = name;
 
-	assert(wordCount > 0);
-	this->wordCount = wordCount;
+    assert( wordCount > 0 );
+    this->wordCount = wordCount;
 
-	assert(wordLength > 0);
-	this->wordLength = wordLength;
+    assert( wordLength > 0 );
+    this->wordLength = wordLength;
 
-	assert(letterDifference > 0 && letterDifference <= wordLength);
-	this->letterDifference = letterDifference;
+    assert( letterDifference > 0 && letterDifference <= wordLength );
+    this->letterDifference = letterDifference;
 
-	assert(startingAttemptCount > 0);
-	assert(startingAttemptCount < wordCount);
-	this->startingAttemptCount = startingAttemptCount;
+    assert( startingAttemptCount > 0 );
+    assert( startingAttemptCount < wordCount );
+    this->startingAttemptCount = startingAttemptCount;
 }
 
 DifficultyLevel::~DifficultyLevel()
@@ -27,30 +27,30 @@ DifficultyLevel::~DifficultyLevel()
 
 int DifficultyLevel::GetRank() const
 {
-	return this->rank;
+    return this->rank;
 }
 
 const std::string & DifficultyLevel::GetName() const
 {
-	return this->name;
+    return this->name;
 }
 
 int DifficultyLevel::GetWordCount() const
 {
-	return this->wordCount;
+    return this->wordCount;
 }
 
 int DifficultyLevel::GetWordLength() const
 {
-	return this->wordLength;
+    return this->wordLength;
 }
 
 int DifficultyLevel::GetLetterDifference() const
 {
-	return this->letterDifference;
+    return this->letterDifference;
 }
 
 int DifficultyLevel::GetStartingAttemptCount() const
 {
-	return this->startingAttemptCount;
+    return this->startingAttemptCount;
 }

@@ -7,19 +7,19 @@
 #include "HackingModel.h"
 #include "HackingView.h"
 
-int main(int argc, char* argv[])
+int main( int argc, char* argv[] )
 {
-	srand((unsigned int)time(nullptr));
+    srand( (unsigned int)time( nullptr ) );
 
-	HackingModel* hackingModel = new HackingModel();
-	HackingView* hackingView = new HackingView(hackingModel);
-	HackingController* hackingController = new HackingController(hackingModel, hackingView);
+    HackingModel* hackingModel = new HackingModel();
+    HackingView* hackingView = new HackingView( hackingModel );
+    HackingController* hackingController = new HackingController( hackingModel, hackingView );
 
-	hackingController->Run();
+    hackingController->Run();
 
-	delete hackingController;
-	delete hackingView;
-	delete hackingController;
+    delete hackingController;
+    delete hackingView;
+    delete hackingController;
 
-	return 0;
+    return 0;
 }

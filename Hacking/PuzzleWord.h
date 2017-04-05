@@ -8,30 +8,30 @@
 class PuzzleWord
 {
 public:
-	PuzzleWord(std::string _text) : text(_text), isHighlighted(false), isRemoved(false), position(-1)
-	{
-		this->screenCoords.resize(_text.length(), { 0, 0 });
-	}
+    PuzzleWord( std::string _text ) : text( _text ), isHighlighted( false ), isRemoved( false ), position( -1 )
+    {
+        this->screenCoords.resize( _text.length(), {0, 0} );
+    }
 
-	const std::string& GetText() const;
+    const std::string& GetText() const;
 
-	bool IsHighlighted() const;
+    bool IsHighlighted() const;
 
-	void SetHighlight(bool isHighlighted);
+    void SetHighlight( bool isHighlighted );
 
-	const int GetPosition() const;
+    const int GetPosition() const;
 
-	void SetPosition(int position);
+    void SetPosition( int position );
 
-	const COORD& GetScreenCoord(unsigned int index) const;
-	COORD& GetScreenCoord(unsigned int index);
+    const COORD& GetScreenCoord( unsigned int index ) const;
+    COORD& GetScreenCoord( unsigned int index );
 
 private:
-	std::string text;
-	bool isHighlighted;
-	bool isRemoved;
-	int position;
-	boost::container::vector<COORD> screenCoords;
+    std::string text;
+    bool isHighlighted;
+    bool isRemoved;
+    int position;
+    boost::container::vector<COORD> screenCoords;
 };
 
 #endif
