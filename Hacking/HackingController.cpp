@@ -95,14 +95,14 @@ void HackingController::Run()
                 if ( record->EventType == MOUSE_EVENT )
                 {
                     cursorCoord = record->Event.MouseEvent.dwMousePosition;
-                    cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() - 1 );
-                    cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() - 1 );
+                    cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() );
+                    cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() );
 
                     this->hackingModel->OnMouseMoveEvent( this->cursorCoord );
 
                     if ( record->Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED )
                     {
-                        this->hackingModel->OnClickEvent( this->cursorCoord );
+                        this->OnClickEvent();
                     }
                 }
 
@@ -120,5 +120,22 @@ void HackingController::Run()
 
         this->hackingView->Render( this->cursorCoord );
         Sleep( 1000 / 24 );
+    }
+}
+
+
+void HackingController::OnClickEvent()
+{
+    if ( this->hackingModel->GetCurrentDifficulty() == nullptr )
+    {
+        DifficultyLevel * cursorDifficulty = this->hackingView->GetDifficultyAtCoord( this->cursorCoord );
+        if ( cursorDifficulty != nullptr )
+        {
+            this->hackingModel->SetDifficultyLevel( cursorDifficulty );
+        }
+    }
+    else
+    {
+        this->hackingModel->OnClickEvent( this->cursorCoord );
     }
 }

@@ -3,14 +3,23 @@
 
 #include <Windows.h>
 #include <string>
-#include <boost/container/vector.hpp>
+#include <vector>
+
+struct LetterPosition
+{
+    int position;
+
+    int column;
+    int x;
+    int y;
+};
 
 class PuzzleWord
 {
 public:
     PuzzleWord( std::string _text ) : text( _text ), isHighlighted( false ), isRemoved( false ), position( -1 )
     {
-        this->screenCoords.resize( _text.length(), {0, 0} );
+        this->letterPositions.resize( _text.length(), {0, 0} );
     }
 
     const std::string& GetText() const;
@@ -21,17 +30,19 @@ public:
 
     const int GetPosition() const;
 
-    void SetPosition( int position );
+    void SetPosition( int position, int columnCount, int columnHeight, int columnWidth );
 
-    const COORD& GetScreenCoord( unsigned int index ) const;
-    COORD& GetScreenCoord( unsigned int index );
+    const LetterPosition& GetLetterPosition( int index ) const;
+
+    LetterPosition& GetLetterPosition( int index );
 
 private:
     std::string text;
     bool isHighlighted;
     bool isRemoved;
     int position;
-    boost::container::vector<COORD> screenCoords;
+
+    std::vector<LetterPosition> letterPositions;
 };
 
 #endif

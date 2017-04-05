@@ -5,7 +5,10 @@
 #include <string>
 #include <vector>
 
+#include "PuzzleWord.h"
+
 class HackingModel;
+class DifficultyLevel;
 
 class HackingView
 {
@@ -22,6 +25,8 @@ public:
 
     short GetLineCountAboveColumns() const;
     const std::vector<std::string> GetIntroText() const;
+
+    DifficultyLevel * GetDifficultyAtCoord( COORD coord ) const;
 
 private:
     const HackingModel * const hackingModel;
@@ -52,8 +57,9 @@ private:
 
     bool IsCoordInArea( const COORD & position, const COORD & start, const COORD & end ) const;
 
-
     void SetHexAddresses();
+
+    COORD LetterPositionToCoord( LetterPosition letterPos ) const;
 };
 
 #endif

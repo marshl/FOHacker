@@ -108,7 +108,7 @@ void HackingModel::OnMouseMoveEvent( const COORD& cursorCoord )
         {
             PuzzleWord* word = this->puzzleWords[i];
 
-            for ( int j = 0; j < this->GetCurrentDifficulty()->GetWordLength(); ++j )
+            /*for ( int j = 0; j < this->GetCurrentDifficulty()->GetWordLength(); ++j )
             {
                 if ( word->GetScreenCoord( j ).X == cursorCoord.X
                     && word->GetScreenCoord( j ).Y == cursorCoord.Y )
@@ -117,17 +117,17 @@ void HackingModel::OnMouseMoveEvent( const COORD& cursorCoord )
                     this->currentHighlightedPuzzleWord = word;
                     break;
                 }
-            }
+            }*/
         }
     }
 }
 
-const DifficultyLevel * const HackingModel::GetCurrentDifficulty() const
+DifficultyLevel * HackingModel::GetCurrentDifficulty() const
 {
     return this->currentDifficulty;
 }
 
-const DifficultyLevel * const HackingModel::GetDifficultyLevelWithIndex( int index ) const
+DifficultyLevel * HackingModel::GetDifficultyLevelWithIndex( int index ) const
 {
     return this->difficultyLevels[index];
 }
@@ -137,10 +137,14 @@ int HackingModel::GetDifficultyCount() const
     return this->difficultyLevels.size();
 }
 
-void HackingModel::SetDifficultyLevel( int index )
+void HackingModel::SetDifficultyLevel( DifficultyLevel * difficulty)
 {
-    assert( index >= 0 && index < this->GetDifficultyCount() );
-    this->currentDifficulty = this->difficultyLevels[index];
+    this->currentDifficulty = difficulty;
+
+    this->SetPuzzleWords();
+    this->PlacePuzzleWords();
+
+    this->attemptsRemaining = this->currentDifficulty->GetStartingAttemptCount();
 }
 
 const int HackingModel::GetColumnWidth() const
@@ -181,8 +185,6 @@ const int HackingModel::GetMaximumWordLength() const
 
     return maximumLength;
 }
-
-
 
 void HackingModel::SetPuzzleWords()
 {
@@ -251,15 +253,17 @@ void HackingModel::PlacePuzzleWords()
 {
     assert( this->GetTotalColumnCharacterCount() > this->GetCurrentDifficulty()->GetWordLength() );
 
-    for ( unsigned int i = 0; i < puzzleWords.size(); )
+    for ( unsigned int puzzleWordIndex = 0; puzzleWordIndex < puzzleWords.size(); )
     {
+        PuzzleWord* puzzleWord = this->GetPuzzleWord( puzzleWordIndex );
+
         // Theoretically, this might go infinite with the right conditions
         int place = rand() % ( this->GetTotalColumnCharacterCount() - this->GetCurrentDifficulty()->GetWordLength() );
         bool badPlacement = false;
         // Check for position collisions with words that have already been placed
-        for ( unsigned int j = 0; j < i; ++j )
+        for ( unsigned int placedWordIndex = 0; placedWordIndex < puzzleWordIndex; ++placedWordIndex )
         {
-            if ( std::abs( puzzleWords[j]->GetPosition() - place ) < this->GetCurrentDifficulty()->GetWordLength() + 1 )
+            if ( std::abs( puzzleWords[placedWordIndex]->GetPosition() - place ) < this->GetCurrentDifficulty()->GetWordLength() + 1 )
             {
                 badPlacement = true;
                 break;
@@ -268,68 +272,8 @@ void HackingModel::PlacePuzzleWords()
 
         if ( !badPlacement )
         {
-            puzzleWords[i]->SetPosition( place );
-            ++i;
-        }
-    }
-
-    for ( unsigned int i = 0; i < puzzleWords.size(); ++i )
-    {
-        int place = puzzleWords[i]->GetPosition();
-
-        int x = place % this->GetColumnWidth();
-        int y = ( place - x ) / this->GetColumnWidth();
-
-        int column = 0;
-
-        while ( y >= this->GetColumnHeight() )
-        {
-            ++column;
-            y -= this->GetColumnHeight();
-        }
-
-        // If the std::string goes over the end of a line
-        if ( x + this->GetCurrentDifficulty()->GetWordLength() > this->GetColumnWidth() )
-        {
-            // Separate it into two
-            std::string chunk1 = puzzleWords[i]->GetText().substr( 0, this->GetColumnWidth() - x + 1 );
-            std::string chunk2 = puzzleWords[i]->GetText().substr( this->GetColumnWidth() - x + 1 );
-
-            for ( int j = 0; j < this->GetColumnWidth() - x + 1; ++j )
-            {
-                COORD& coord = puzzleWords[i]->GetScreenCoord( j );
-
-                coord.X = x;// +HEX_CODE_LENGTH + column * TOTAL_COLUMN_WIDTH + j;
-                // TODO: Offset this in the view/controller
-                coord.Y = y;// +LINES_BEFORE_COLUMNS;
-            }
-
-            // Render one half
-            ++y;
-            if ( y >= this->GetColumnHeight() )
-            {
-                ++column;
-                y -= this->GetColumnHeight();
-            }
-
-            int k = 0;
-            for ( int j = this->GetColumnWidth() - x + 1; j < this->GetCurrentDifficulty()->GetWordLength(); ++j )
-            {
-                COORD& coord = puzzleWords[i]->GetScreenCoord( j );
-                coord.X = this->GetColumnWidth() + 1 + column * this->GetColumnWidth() + k;
-                // TODO: Offset this in the view/controller
-                coord.Y = y;// + LINES_BEFORE_COLUMNS;
-                ++k;
-            }
-        }
-        else
-        {
-            for ( int j = 0; j < this->GetCurrentDifficulty()->GetWordLength(); ++j )
-            {
-                COORD& coord = puzzleWords[i]->GetScreenCoord( j );
-                coord.X = x;// +1 + HEX_CODE_LENGTH + column * TOTAL_COLUMN_WIDTH + j;
-                coord.Y = y;// + LINES_BEFORE_COLUMNS;
-            }
+            puzzleWord->SetPosition( place, this->GetColumnCount(), this->GetColumnHeight(), this->GetColumnWidth());
+            ++puzzleWordIndex;
         }
     }
 }

@@ -25,6 +25,8 @@ private:
 
     HANDLE inputHandle;
     HANDLE outputHandle;
+
+    void OnClickEvent();
 };
 
 #endif

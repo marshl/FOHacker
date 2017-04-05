@@ -66,14 +66,8 @@ int HackingView::GetScreenHeight() const
 
 int HackingView::GetScreenWidth() const
 {
-    const int COLUMN_CHARACTER_WIDTH = 12;
-    const int HEX_CODE_LENGTH = 6;
-
-    const int ANSWER_AREA_WIDTH = this->hackingModel->GetMaximumWordLength() + 1;
-    const int TOTAL_COLUMN_WIDTH = HEX_CODE_LENGTH + 1 + COLUMN_CHARACTER_WIDTH + 1;
-    const int TOTAL_SCREEN_WIDTH = 80;// TOTAL_COLUMN_WIDTH * COLUMN_COUNT + ANSWER_AREA_WIDTH;
-
-    return 80;
+    const int answerAreaWidth = this->hackingModel->GetMaximumWordLength() + 1;
+    return this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + answerAreaWidth;
 }
 
 int HackingView::GetTotalColumnWidth() const
@@ -88,7 +82,7 @@ int HackingView::GetHexCodeLength() const
 
 short HackingView::GetLineCountAboveColumns() const
 {
-    return 3;
+    return 3 + this->GetIntroText().size();
 }
 
 const std::vector<std::string> HackingView::GetIntroText() const
@@ -98,6 +92,22 @@ const std::vector<std::string> HackingView::GetIntroText() const
         "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL",
             "!!!! WARNING: LOCKOUT IMMINENT !!!!",
     };
+}
+
+DifficultyLevel * HackingView::GetDifficultyAtCoord( COORD coord ) const
+{
+    for ( int i = 0; i < this->hackingModel->GetDifficultyCount(); ++i )
+    {
+        DifficultyLevel * difficulty = this->hackingModel->GetDifficultyLevelWithIndex( i );
+
+        COORD textPosition = {(short)( this->GetScreenWidth() - difficulty->GetName().size() ) / 2, (short)i * 2 + 5};
+        if ( this->IsCoordInString( coord, textPosition, difficulty->GetName().size() ) )
+        {
+            return difficulty;
+        }
+    }
+
+    return nullptr;
 }
 
 void HackingView::ClearBuffer()
@@ -144,11 +154,11 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 
     std::ostringstream outstr;
     outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
-    this->RenderText( {0, this->GetLineCountAboveColumns() + 1}, outstr.str(), false );
+    this->RenderText( {0, (short)this->GetIntroText().size() + 1}, outstr.str(), false );
 
     for ( int x = 0; x < this->hackingModel->GetColumnCount(); ++x )
     {
-        for ( int y = 0; y < this->hackingModel->GetColumnWidth(); ++y )
+        for ( int y = 0; y < this->hackingModel->GetColumnHeight(); ++y )
         {
             const std::string& hexCode = this->hexAddresses[x * this->hackingModel->GetColumnHeight() + y];
             COORD coord = {(short)( x * this->GetTotalColumnWidth() ), (short)( y + this->GetLineCountAboveColumns() )};
@@ -161,7 +171,8 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
         for ( int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j )
         {
             const PuzzleWord * const puzzleWord = this->hackingModel->GetPuzzleWord( i );
-            COORD coord = puzzleWord->GetScreenCoord( j );
+            LetterPosition letterPos = puzzleWord->GetLetterPosition( j );
+            COORD coord = this->LetterPositionToCoord( letterPos );
             this->characterBuffer[coord.Y][coord.X] = puzzleWord->GetText()[j];
         }
     }
@@ -179,7 +190,7 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 
     }
 
-    for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
+    /*for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
     {
         PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWord( i );
 
@@ -191,7 +202,7 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
                 this->highlightBuffer[pos.Y][pos.X] = true;
             }
         }
-    }
+    }*/
 
     if ( this->hackingModel->GetSelectedPuzzleWord() != nullptr )
     {
@@ -248,4 +259,11 @@ void HackingView::SetHexAddresses()
         hexAddresses[i] = stream.str();
         std::transform( hexAddresses[i].begin() + 2, hexAddresses[i].end(), hexAddresses[i].begin() + 2, ::toupper );
     }
+}
+
+COORD HackingView::LetterPositionToCoord( LetterPosition letterPos ) const
+{
+    int xpos = letterPos.x + letterPos.column * this->GetTotalColumnWidth() + this->GetHexCodeLength() + 1;
+    int ypos = letterPos.y + this->GetLineCountAboveColumns();
+    return{(short)xpos, (short)ypos};
 }

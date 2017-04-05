@@ -25,12 +25,12 @@ public:
     void OnClickEvent( const COORD& cursorCoord );
     void OnMouseMoveEvent( const COORD& cursorCoord );
 
-    const DifficultyLevel * const GetCurrentDifficulty() const;
+    DifficultyLevel * GetCurrentDifficulty() const;
 
-    const DifficultyLevel * const GetDifficultyLevelWithIndex( int index ) const;
+    DifficultyLevel * GetDifficultyLevelWithIndex( int index ) const;
     int GetDifficultyCount() const;
 
-    void SetDifficultyLevel( int index );
+    void SetDifficultyLevel( DifficultyLevel * difficulty );
 
     const int GetColumnWidth() const;
     const int GetColumnHeight() const;
@@ -49,7 +49,7 @@ private:
     std::vector<DifficultyLevel*> difficultyLevels;
     std::vector<std::string> fillerCharacters;
 
-    DifficultyLevel* currentDifficulty;
+    DifficultyLevel * currentDifficulty;
 
     PuzzleWord* currentHighlightedPuzzleWord;
 
