@@ -134,6 +134,6 @@ void HackingController::OnClickEvent()
     }
     else
     {
-        this->hackingModel->OnClickEvent( this->cursorCoord );
+        
     }
 }

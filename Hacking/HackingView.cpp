@@ -66,7 +66,7 @@ int HackingView::GetScreenHeight() const
 
 int HackingView::GetScreenWidth() const
 {
-    const int answerAreaWidth = this->hackingModel->GetMaximumWordLength() + 1;
+    const int answerAreaWidth = this->hackingModel->GetMaximumWordLength() + 3;
     return this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + answerAreaWidth;
 }
 
@@ -168,9 +168,9 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 
     for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
     {
+        const PuzzleWord * const puzzleWord = this->hackingModel->GetPuzzleWord( i );
         for ( int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j )
         {
-            const PuzzleWord * const puzzleWord = this->hackingModel->GetPuzzleWord( i );
             LetterPosition letterPos = puzzleWord->GetLetterPosition( j );
             COORD coord = this->LetterPositionToCoord( letterPos );
             this->characterBuffer[coord.Y][coord.X] = puzzleWord->GetText()[j];
@@ -190,12 +190,14 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 
     }
 
+    PuzzleWord* selectedPuzzleWord = nullptr;
     for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
     {
         PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWord( i );
 
         if ( this->IsCoordInPuzzleWord( cursorCoord, puzzleWord ) )
         {
+            selectedPuzzleWord = puzzleWord;
             for ( int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j )
             {
                 COORD& pos = this->LetterPositionToCoord( puzzleWord->GetLetterPosition( j ) );
@@ -204,10 +206,10 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
         }
     }
 
-    if ( this->hackingModel->GetSelectedPuzzleWord() != nullptr )
+    if (selectedPuzzleWord != nullptr )
     {
         std::ostringstream outstr;
-        outstr << "> " << this->hackingModel->GetSelectedPuzzleWord()->GetText();
+        outstr << "> " << selectedPuzzleWord->GetText();
 
         this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1,
             outstr.str().length(),

@@ -13,7 +13,6 @@
 
 HackingModel::HackingModel()
 {
-    this->currentHighlightedPuzzleWord = nullptr;
     this->currentDifficulty = nullptr;
 
     this->InitialiseDifficultyLevels();
@@ -64,29 +63,6 @@ const int HackingModel::GetAttemptedWordCount() const
 PuzzleWord * const HackingModel::GetPuzzleWord( int index ) const
 {
     return this->puzzleWords[index];
-}
-
-PuzzleWord * const HackingModel::GetSelectedPuzzleWord() const
-{
-    return this->currentHighlightedPuzzleWord;
-}
-
-void HackingModel::OnClickEvent( const COORD& cursorCoord )
-{
-    if ( this->currentHighlightedPuzzleWord != nullptr )
-    {
-        int diff = StringDiff( this->currentHighlightedPuzzleWord->GetText(), this->solutionWord );
-
-        if ( diff == 0 )
-        {
-
-        }
-        else
-        {
-            this->attemptedWords.push_back( this->currentHighlightedPuzzleWord->GetText() );
-            --this->attemptsRemaining;
-        }
-    }
 }
 
 DifficultyLevel * HackingModel::GetCurrentDifficulty() const

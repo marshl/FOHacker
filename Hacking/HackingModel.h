@@ -20,9 +20,6 @@ public:
     const int GetAttemptedWordCount() const;
 
     PuzzleWord * const GetPuzzleWord( int index ) const;
-    PuzzleWord * const GetSelectedPuzzleWord() const;
-
-    void OnClickEvent( const COORD& cursorCoord );
 
     DifficultyLevel * GetCurrentDifficulty() const;
 
@@ -49,8 +46,6 @@ private:
     std::vector<std::string> fillerCharacters;
 
     DifficultyLevel * currentDifficulty;
-
-    PuzzleWord* currentHighlightedPuzzleWord;
 
     void SetPuzzleWords();
     void PlacePuzzleWords();
