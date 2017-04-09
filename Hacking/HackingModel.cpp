@@ -291,6 +291,21 @@ void HackingModel::SetupMatchingBrackets()
             this->matchingBrackets.insert( this->matchingBrackets.end(), brackets.begin(), brackets.end() );
         }
     }
+
+#if _DEBUG
+    for ( int i = 0; i < this->matchingBrackets.size(); ++i )
+    {
+        for ( int j = i + 1; j < this->matchingBrackets.size(); ++j )
+        {
+            MatchingBracket& a = this->matchingBrackets[i];
+            MatchingBracket& b = this->matchingBrackets[j];
+            if ( a.GetColumn() == b.GetColumn() && a.GetRow() == b.GetRow() && a.GetStartingPosition() == b.GetStartingPosition() )
+            {
+                assert( false );
+            }
+        }
+    }
+#endif
 }
 
 std::vector<MatchingBracket> HackingModel::GetMatchingBracketsForLine( int columnIndex, int rowIndex )
@@ -306,20 +321,20 @@ std::vector<MatchingBracket> HackingModel::GetMatchingBracketsForLine( int colum
 
     for ( int charIndex = 0; charIndex < (int)validStartingChars.size(); ++charIndex )
     {
-        size_t closingOffset = fillerText.length();
-        while ( closingOffset >= 1 && ( closingOffset = fillerText.rfind( validEndingChars[charIndex], closingOffset - 1 ) ) != std::string::npos )
+        size_t openingOffset = 0;
+        while ( openingOffset < fillerText.size() && ( openingOffset = fillerText.find( validStartingChars[charIndex], openingOffset ) ) != std::string::npos )
         {
-            size_t openingOffset = closingOffset;
-            size_t tempOffset = openingOffset;
-            while ( openingOffset != 0 && ( tempOffset = fillerText.rfind( validStartingChars[charIndex], openingOffset - 1 ) ) != std::string::npos )
+            size_t closingOffset;
+            if ( ( closingOffset = fillerText.find( validEndingChars[charIndex], openingOffset + 1 ) ) != std::string::npos )
             {
-                openingOffset = tempOffset;
                 char openingSymbol = fillerText[openingOffset];
                 char closingSymbol = fillerText[closingOffset];
 
                 MatchingBracket match( openingSymbol, closingSymbol, columnIndex, rowIndex, openingOffset, closingOffset );
                 result.push_back( match );
             }
+
+            openingOffset += 1;
         }
     }
 
