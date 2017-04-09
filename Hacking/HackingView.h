@@ -59,6 +59,7 @@ private:
 
     void SetHexAddresses();
 
+    COORD ColumnPositionToCoord( int columnIndex, int rowIndex, int position ) const;
     COORD LetterPositionToCoord( LetterPosition letterPos ) const;
 
     bool IsCoordInPuzzleWord( COORD coord, PuzzleWord* puzzleWord );

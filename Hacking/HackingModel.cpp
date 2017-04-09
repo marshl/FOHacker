@@ -124,6 +124,17 @@ const std::string& HackingModel::GetFillerText( int columnIndex, int rowIndex ) 
     return this->fillerCharacters[columnIndex][rowIndex];
 }
 
+const int HackingModel::GetMatchingBracketCount() const
+{
+    return this->matchingBrackets.size();
+}
+
+const MatchingBracket & HackingModel::GetMatchingBracket( int matchingBracketIndex ) const
+{
+    assert( matchingBracketIndex >= 0 && matchingBracketIndex < this->GetMatchingBracketCount() );
+    return this->matchingBrackets[matchingBracketIndex];
+}
+
 void HackingModel::SetPuzzleWords()
 {
     std::vector<std::string> allWords;

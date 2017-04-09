@@ -194,6 +194,28 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 
     }
 
+    const MatchingBracket * bracket = nullptr;
+    for ( int i = 0; i < this->hackingModel->GetMatchingBracketCount(); ++i )
+    {
+        const MatchingBracket& matchingBracket = this->hackingModel->GetMatchingBracket( i );
+
+        COORD startingCoord = this->ColumnPositionToCoord( matchingBracket.GetColumn(), matchingBracket.GetRow(), matchingBracket.GetStartingPosition() );
+        if ( startingCoord.X == cursorCoord.X && startingCoord.Y == cursorCoord.Y )
+        {
+            bracket = &matchingBracket;
+            break;
+        }
+    }
+
+    if ( bracket != nullptr )
+    {
+        for ( int position = bracket->GetStartingPosition(); position <= bracket->GetEndingPosition(); ++position )
+        {
+            COORD coord = this->ColumnPositionToCoord( bracket->GetColumn(), bracket->GetRow(), position );
+            this->highlightBuffer[coord.Y][coord.X] = true;
+        }
+    }
+
     PuzzleWord* selectedPuzzleWord = nullptr;
     for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
     {
@@ -210,7 +232,7 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
         }
     }
 
-    if (selectedPuzzleWord != nullptr )
+    if ( selectedPuzzleWord != nullptr )
     {
         std::ostringstream outstr;
         outstr << "> " << selectedPuzzleWord->GetText();
@@ -267,11 +289,16 @@ void HackingView::SetHexAddresses()
     }
 }
 
+COORD HackingView::ColumnPositionToCoord( int columnIndex, int rowIndex, int position ) const
+{
+    int xpos = position + columnIndex * this->GetTotalColumnWidth() + this->GetHexCodeLength() + 1;
+    int ypos = rowIndex + this->GetLineCountAboveColumns();
+    return{(short)xpos, (short)ypos};
+}
+
 COORD HackingView::LetterPositionToCoord( LetterPosition letterPos ) const
 {
-    int xpos = letterPos.x + letterPos.column * this->GetTotalColumnWidth() + this->GetHexCodeLength() + 1;
-    int ypos = letterPos.y + this->GetLineCountAboveColumns();
-    return{(short)xpos, (short)ypos};
+    return this->ColumnPositionToCoord( letterPos.column, letterPos.y, letterPos.x );
 }
 
 bool HackingView::IsCoordInPuzzleWord( COORD coord, PuzzleWord * puzzleWord )

@@ -39,6 +39,9 @@ public:
 
     const std::string& GetFillerText( int columnIndex, int rowIndex ) const;
 
+    const int GetMatchingBracketCount() const;
+    const MatchingBracket& GetMatchingBracket( int matchingBracketIndex ) const;
+
 private:
     int attemptsRemaining;
 
