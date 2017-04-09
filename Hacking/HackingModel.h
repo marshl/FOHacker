@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <Windows.h>
+#include "MatchingBracket.h"
 
 class PuzzleWord;
 class DifficultyLevel;
@@ -36,6 +37,8 @@ public:
 
     const int GetMaximumWordLength() const;
 
+    const std::string& GetFillerText( int columnIndex, int rowIndex ) const;
+
 private:
     int attemptsRemaining;
 
@@ -43,7 +46,8 @@ private:
     std::vector<PuzzleWord*> puzzleWords;
     std::vector<std::string> attemptedWords;
     std::vector<DifficultyLevel*> difficultyLevels;
-    std::vector<std::string> fillerCharacters;
+    std::vector<std::vector<std::string>> fillerCharacters;
+    std::vector<MatchingBracket> matchingBrackets;
 
     DifficultyLevel * currentDifficulty;
 
@@ -51,6 +55,11 @@ private:
     void PlacePuzzleWords();
     void GetSampleWordList( std::vector<std::string>& _out );
     void InitialiseDifficultyLevels();
+    void RandomiseFillerLetters();
+
+    void SetupMatchingBrackets();
+
+    std::vector<MatchingBracket> GetMatchingBracketsForLine( int columnIndex, int rowIndex );
 };
 
 #endif

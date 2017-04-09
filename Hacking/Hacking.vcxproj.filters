@@ -36,6 +36,9 @@
     <ClCompile Include="DifficultyLevel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MatchingBracket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strfunc.h">
@@ -57,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchingBracket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

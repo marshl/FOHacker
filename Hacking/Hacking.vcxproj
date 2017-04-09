@@ -75,6 +75,7 @@
     <ClCompile Include="HackingModel.cpp" />
     <ClCompile Include="HackingView.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MatchingBracket.cpp" />
     <ClCompile Include="PuzzleWord.cpp" />
     <ClCompile Include="strfunc.cpp" />
   </ItemGroup>
@@ -83,6 +84,7 @@
     <ClInclude Include="HackingController.h" />
     <ClInclude Include="HackingModel.h" />
     <ClInclude Include="HackingView.h" />
+    <ClInclude Include="MatchingBracket.h" />
     <ClInclude Include="PuzzleWord.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="strfunc.h" />

@@ -156,13 +156,17 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
     outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
     this->RenderText( {0, ( short )this->GetIntroText().size() + 1}, outstr.str(), false );
 
-    for ( int x = 0; x < this->hackingModel->GetColumnCount(); ++x )
+    for ( int columnIndex = 0; columnIndex < this->hackingModel->GetColumnCount(); ++columnIndex )
     {
-        for ( int y = 0; y < this->hackingModel->GetColumnHeight(); ++y )
+        for ( int rowIndex = 0; rowIndex < this->hackingModel->GetColumnHeight(); ++rowIndex )
         {
-            const std::string& hexCode = this->hexAddresses[x * this->hackingModel->GetColumnHeight() + y];
-            COORD coord = {(short)( x * this->GetTotalColumnWidth() ), (short)( y + this->GetLineCountAboveColumns() )};
-            this->RenderText( coord, hexCode, false );
+            const std::string& hexCode = this->hexAddresses[columnIndex * this->hackingModel->GetColumnHeight() + rowIndex];
+            COORD hexCoord = {(short)( columnIndex * this->GetTotalColumnWidth() ), (short)( rowIndex + this->GetLineCountAboveColumns() )};
+            this->RenderText( hexCoord, hexCode, false );
+
+            const std::string& fillerText = this->hackingModel->GetFillerText( columnIndex, rowIndex );
+            COORD fillerCoord = {hexCoord.X + ( short )this->GetHexCodeLength() + 1, hexCoord.Y};
+            this->RenderText( fillerCoord, fillerText, false );
         }
     }
 
