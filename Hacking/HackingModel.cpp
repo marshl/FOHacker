@@ -53,6 +53,25 @@ PuzzleWord * const HackingModel::GetPuzzleWord( int index ) const
     return this->puzzleWords[index];
 }
 
+PuzzleWord * const HackingModel::GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const
+{
+    for ( int wordIndex = 0; wordIndex < this->puzzleWords.size(); ++wordIndex )
+    {
+        PuzzleWord * const puzzleWord = this->puzzleWords[wordIndex];
+        for ( int letterIndex = 0; letterIndex < puzzleWord->GetText().size(); ++letterIndex )
+        {
+            const LetterPosition& letterPos = puzzleWord->GetLetterPosition( letterIndex );
+
+            if ( columnIndex == letterPos.column && rowIndex == letterPos.y && positionInRow == letterPos.x )
+            {
+                return puzzleWord;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 DifficultyLevel * HackingModel::GetCurrentDifficulty() const
 {
     return this->currentDifficulty;
@@ -307,29 +326,19 @@ void HackingModel::SetupMatchingBrackets()
     }
 #endif
 
-    for ( int wordIndex = 0; wordIndex < this->puzzleWords.size(); ++wordIndex )
+    for ( int i = 0; i < this->matchingBrackets.size(); )
     {
-        PuzzleWord* puzzleWord = this->puzzleWords[wordIndex];
-        for ( int letterIndex = 0; letterIndex < puzzleWord->GetText().size(); ++letterIndex )
+        MatchingBracket& bracket = this->matchingBrackets[i];
+        if ( this->GetPuzzleWordAtPosition( bracket.GetColumn(), bracket.GetRow(), bracket.GetStartingPosition() ) != nullptr
+            || this->GetPuzzleWordAtPosition( bracket.GetColumn(), bracket.GetRow(), bracket.GetEndingPosition() ) != nullptr )
         {
-            const LetterPosition& letterPos = puzzleWord->GetLetterPosition( letterIndex );
-            for ( int i = 0; i < this->matchingBrackets.size(); )
-            {
-                MatchingBracket& bracket = this->matchingBrackets[i];
-                if ( bracket.GetColumn() == letterPos.column && bracket.GetRow() == letterPos.y
-                    && ( bracket.GetOpeningSymbol() == letterPos.x || bracket.GetEndingPosition() == letterPos.x ) )
-                {
-                    this->matchingBrackets.erase( this->matchingBrackets.begin() + i );
-                }
-                else
-                {
-                    ++i;
-                }
-            }
+            this->matchingBrackets.erase( this->matchingBrackets.begin() + i );
+        }
+        else
+        {
+            ++i;
         }
     }
-
-
 }
 
 std::vector<MatchingBracket> HackingModel::GetMatchingBracketsForLine( int columnIndex, int rowIndex )

@@ -22,6 +22,8 @@ public:
 
     PuzzleWord * const GetPuzzleWord( int index ) const;
 
+    PuzzleWord * const GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const;
+
     DifficultyLevel * GetCurrentDifficulty() const;
 
     DifficultyLevel * GetDifficultyLevelWithIndex( int index ) const;
