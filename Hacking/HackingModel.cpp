@@ -306,6 +306,30 @@ void HackingModel::SetupMatchingBrackets()
         }
     }
 #endif
+
+    for ( int wordIndex = 0; wordIndex < this->puzzleWords.size(); ++wordIndex )
+    {
+        PuzzleWord* puzzleWord = this->puzzleWords[wordIndex];
+        for ( int letterIndex = 0; letterIndex < puzzleWord->GetText().size(); ++letterIndex )
+        {
+            const LetterPosition& letterPos = puzzleWord->GetLetterPosition( letterIndex );
+            for ( int i = 0; i < this->matchingBrackets.size(); )
+            {
+                MatchingBracket& bracket = this->matchingBrackets[i];
+                if ( bracket.GetColumn() == letterPos.column && bracket.GetRow() == letterPos.y
+                    && ( bracket.GetOpeningSymbol() == letterPos.x || bracket.GetEndingPosition() == letterPos.x ) )
+                {
+                    this->matchingBrackets.erase( this->matchingBrackets.begin() + i );
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+        }
+    }
+
+
 }
 
 std::vector<MatchingBracket> HackingModel::GetMatchingBracketsForLine( int columnIndex, int rowIndex )
