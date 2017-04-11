@@ -28,6 +28,10 @@ public:
 
     DifficultyLevel * GetDifficultyAtCoord( COORD coord ) const;
 
+    bool CoordToLetterPosition( COORD coord, LetterPosition& ) const;
+
+    bool IsCoordInPuzzleWord( COORD coord, PuzzleWord* puzzleWord ) const;
+
 private:
     const HackingModel * const hackingModel;
 
@@ -61,10 +65,7 @@ private:
 
     COORD ColumnPositionToCoord( int columnIndex, int rowIndex, int position ) const;
     COORD LetterPositionToCoord( LetterPosition letterPos ) const;
-    bool CoordToLetterPosition( COORD coord, LetterPosition& ) const;
     void RenderLetterPositionOfCoord( COORD coord );
-
-    bool IsCoordInPuzzleWord( COORD coord, PuzzleWord* puzzleWord ) const;
 };
 
 #endif

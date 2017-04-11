@@ -1,9 +1,9 @@
 #ifndef PUZZLE_WORD_H_
 #define PUZZLE_WORD_H_
 
-#include <Windows.h>
 #include <string>
 #include <vector>
+#include "strfunc.h"
 
 struct LetterPosition
 {
@@ -17,10 +17,7 @@ struct LetterPosition
 class PuzzleWord
 {
 public:
-    PuzzleWord( std::string _text ) : text( _text ), isRemoved( false ), position( -1 )
-    {
-        this->letterPositions.resize( _text.length(), {0, 0} );
-    }
+    PuzzleWord( std::string text, std::string solution );
 
     const std::string& GetText() const;
 
@@ -32,10 +29,17 @@ public:
 
     LetterPosition& GetLetterPosition( int index );
 
+    bool GetIsAttempted() const;
+
+    void SetIsAttempted( bool attempted );
+
+    int GetDifferenceFromSolution() const;
+
 private:
     std::string text;
-    bool isRemoved;
+    bool isAttempted;
     int position;
+    int differenceFromSolution;
 
     std::vector<LetterPosition> letterPositions;
 };

@@ -48,6 +48,11 @@ const int HackingModel::GetAttemptedWordCount() const
     return this->attemptedWords.size();
 }
 
+PuzzleWord * const HackingModel::GetSolutionWord() const
+{
+    return this->solutionWord;
+}
+
 PuzzleWord * const HackingModel::GetPuzzleWord( int index ) const
 {
     return this->puzzleWords[index];
@@ -55,10 +60,10 @@ PuzzleWord * const HackingModel::GetPuzzleWord( int index ) const
 
 PuzzleWord * const HackingModel::GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const
 {
-    for ( int wordIndex = 0; wordIndex < this->puzzleWords.size(); ++wordIndex )
+    for ( int wordIndex = 0; wordIndex < ( int )this->puzzleWords.size(); ++wordIndex )
     {
         PuzzleWord * const puzzleWord = this->puzzleWords[wordIndex];
-        for ( int letterIndex = 0; letterIndex < puzzleWord->GetText().size(); ++letterIndex )
+        for ( int letterIndex = 0; letterIndex < (int)puzzleWord->GetText().size(); ++letterIndex )
         {
             const LetterPosition& letterPos = puzzleWord->GetLetterPosition( letterIndex );
 
@@ -70,6 +75,11 @@ PuzzleWord * const HackingModel::GetPuzzleWordAtPosition( int columnIndex, int r
     }
 
     return nullptr;
+}
+
+PuzzleWord * const HackingModel::GetPuzzleWordAtLetterPosition( const LetterPosition & letterPos ) const
+{
+    return this->GetPuzzleWordAtPosition( letterPos.column, letterPos.y, letterPos.x );
 }
 
 DifficultyLevel * HackingModel::GetCurrentDifficulty() const
@@ -154,6 +164,24 @@ const MatchingBracket & HackingModel::GetMatchingBracket( int matchingBracketInd
     return this->matchingBrackets[matchingBracketIndex];
 }
 
+bool HackingModel::AttemptWord( PuzzleWord * const puzzleWord )
+{
+    assert( this->solutionWord != nullptr );
+    assert( std::find( this->puzzleWords.begin(), this->puzzleWords.end(), puzzleWord ) != this->puzzleWords.end() );
+
+    if ( puzzleWord == this->solutionWord )
+    {
+        return true;
+    }
+    else
+    {
+        --this->attemptsRemaining;
+        this->attemptedWords.push_back( puzzleWord );
+        puzzleWord->SetIsAttempted( true );
+        return false;
+    }
+}
+
 void HackingModel::SetPuzzleWords()
 {
     std::vector<std::string> allWords;
@@ -192,10 +220,17 @@ void HackingModel::SetPuzzleWords()
 
                 if ( solutionWords.size() == this->GetCurrentDifficulty()->GetWordCount() )
                 {
+                    std::random_shuffle( solutionWords.begin(), solutionWords.end() );
+
+                    std::string solution = solutionWords.front();
+
                     for each( std::string word in solutionWords )
                     {
-                        this->puzzleWords.push_back( new PuzzleWord( word ) );
+                        this->puzzleWords.push_back( new PuzzleWord( word, solution ) );
                     }
+
+                    this->solutionWord = this->puzzleWords.front();
+
                     return;
                 }
 
@@ -312,9 +347,9 @@ void HackingModel::SetupMatchingBrackets()
     }
 
 #if _DEBUG
-    for ( int i = 0; i < this->matchingBrackets.size(); ++i )
+    for ( int i = 0; i < ( int )this->matchingBrackets.size(); ++i )
     {
-        for ( int j = i + 1; j < this->matchingBrackets.size(); ++j )
+        for ( int j = i + 1; j < ( int )this->matchingBrackets.size(); ++j )
         {
             MatchingBracket& a = this->matchingBrackets[i];
             MatchingBracket& b = this->matchingBrackets[j];
@@ -326,7 +361,7 @@ void HackingModel::SetupMatchingBrackets()
     }
 #endif
 
-    for ( int i = 0; i < this->matchingBrackets.size(); )
+    for ( int i = 0; i < ( int )this->matchingBrackets.size(); )
     {
         MatchingBracket& bracket = this->matchingBrackets[i];
         if ( this->GetPuzzleWordAtPosition( bracket.GetColumn(), bracket.GetRow(), bracket.GetStartingPosition() ) != nullptr

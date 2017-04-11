@@ -2,6 +2,13 @@
 
 #include <cassert>
 
+PuzzleWord::PuzzleWord( std::string text, std::string solution ) : text( text ), isAttempted( false ), position( -1 ), differenceFromSolution( 0 )
+{
+    this->letterPositions.resize( text.length(), {0, 0} );
+
+    this->differenceFromSolution = StringDiff( text, solution );
+}
+
 const std::string & PuzzleWord::GetText() const
 {
     return this->text;
@@ -39,4 +46,19 @@ LetterPosition & PuzzleWord::GetLetterPosition( int index )
 {
     assert( index >= 0 && index < ( int )this->text.size() );
     return this->letterPositions[index];
+}
+
+bool PuzzleWord::GetIsAttempted() const
+{
+    return this->isAttempted;
+}
+
+void PuzzleWord::SetIsAttempted( bool attempted )
+{
+    this->isAttempted = attempted;
+}
+
+int PuzzleWord::GetDifferenceFromSolution() const
+{
+    return this->differenceFromSolution;
 }

@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 #include <Windows.h>
+#include "PuzzleWord.h"
 #include "MatchingBracket.h"
 
-class PuzzleWord;
 class DifficultyLevel;
 
 class HackingModel
@@ -20,9 +20,13 @@ public:
     const int GetPuzzleWordCount() const;
     const int GetAttemptedWordCount() const;
 
+    PuzzleWord * const GetSolutionWord() const;
+
     PuzzleWord * const GetPuzzleWord( int index ) const;
 
     PuzzleWord * const GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const;
+
+    PuzzleWord * const GetPuzzleWordAtLetterPosition( const LetterPosition& letterPos ) const;
 
     DifficultyLevel * GetCurrentDifficulty() const;
 
@@ -44,12 +48,14 @@ public:
     const int GetMatchingBracketCount() const;
     const MatchingBracket& GetMatchingBracket( int matchingBracketIndex ) const;
 
+    bool AttemptWord( PuzzleWord * const puzzleWord );
+
 private:
     int attemptsRemaining;
 
-    std::string solutionWord;
-    std::vector<PuzzleWord*> puzzleWords;
-    std::vector<std::string> attemptedWords;
+    std::vector<PuzzleWord * > puzzleWords;
+    PuzzleWord* solutionWord;
+    std::vector<PuzzleWord * > attemptedWords;
     std::vector<DifficultyLevel*> difficultyLevels;
     std::vector<std::vector<std::string>> fillerCharacters;
     std::vector<MatchingBracket> matchingBrackets;

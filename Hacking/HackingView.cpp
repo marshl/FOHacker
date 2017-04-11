@@ -149,7 +149,7 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
 {
     for ( int i = 0; i < ( int )this->GetIntroText().size(); ++i )
     {
-        this->characterBuffer[i].replace( 0, this->GetIntroText()[i].size(), this->GetIntroText()[i] );
+        this->RenderText( {0, (short)i}, this->GetIntroText()[i], false );
     }
 
     std::ostringstream outstr;
