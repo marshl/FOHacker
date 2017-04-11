@@ -19,7 +19,7 @@ int main( int argc, char* argv[] )
 
     delete hackingController;
     delete hackingView;
-    delete hackingController;
+    delete hackingModel;
 
     return 0;
 }
