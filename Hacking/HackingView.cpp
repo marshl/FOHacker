@@ -301,7 +301,40 @@ COORD HackingView::LetterPositionToCoord( LetterPosition letterPos ) const
     return this->ColumnPositionToCoord( letterPos.column, letterPos.y, letterPos.x );
 }
 
-bool HackingView::IsCoordInPuzzleWord( COORD coord, PuzzleWord * puzzleWord )
+bool HackingView::CoordToLetterPosition( COORD coord, LetterPosition& letterPosition ) const
+{
+    if ( coord.Y < this->GetLineCountAboveColumns() || coord.Y >= this->hackingModel->GetColumnHeight() + this->GetLineCountAboveColumns() )
+    {
+        return false;
+    }
+
+    for ( int columnNumber = 0; columnNumber < this->hackingModel->GetColumnCount(); ++columnNumber )
+    {
+        if ( coord.X > this->GetHexCodeLength() + columnNumber * this->GetTotalColumnWidth()
+            && coord.X < this->GetTotalColumnWidth() * ( columnNumber + 1 ) - 1
+            )
+        {
+            letterPosition.x = coord.X - ( this->GetHexCodeLength() + columnNumber * this->GetTotalColumnWidth() ) - 1;
+            letterPosition.y = coord.Y - this->GetLineCountAboveColumns();
+            letterPosition.column = columnNumber;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void HackingView::RenderLetterPositionOfCoord( COORD coord )
+{
+    std::ostringstream ostream;
+    LetterPosition currentLetterPos;
+    bool hl = this->CoordToLetterPosition( coord, currentLetterPos );
+    ostream << currentLetterPos.x << " " << currentLetterPos.y << " " << currentLetterPos.column;
+    this->RenderText( {0,0}, ostream.str(), hl );
+}
+
+bool HackingView::IsCoordInPuzzleWord( COORD coord, PuzzleWord * puzzleWord ) const
 {
     for ( int i = 0; i < (int)puzzleWord->GetText().size(); ++i )
     {
@@ -314,3 +347,4 @@ bool HackingView::IsCoordInPuzzleWord( COORD coord, PuzzleWord * puzzleWord )
 
     return false;
 }
+
