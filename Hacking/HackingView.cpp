@@ -203,10 +203,14 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
         for ( int j = 0; j < playerAction->GetDisplayHeight(); ++j )
         {
             this->RenderText( coord, "> " + playerAction->GetDisplayText(j), false );
-            coord.Y -= 1;
+            --coord.Y;
+            ++attemptedWordOffset;
+            if ( attemptedWordOffset > this->hackingModel->GetColumnHeight() - 2 )
+            {
+                i = -1;
+                break;
+            }
         }
-        
-        attemptedWordOffset += playerAction->GetDisplayHeight();
     }
 
     const MatchingBracket * bracket = nullptr;
