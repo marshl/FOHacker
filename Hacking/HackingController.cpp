@@ -83,6 +83,8 @@ void HackingController::Run()
     dwStyle ^= WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
     SetWindowLong( hwnd, GWL_STYLE, dwStyle );
 
+    DWORD lastMouseState = 0;
+
     while ( !done )
     {
         const int INPUT_BUFFER_SIZE = 255;
@@ -100,10 +102,12 @@ void HackingController::Run()
                     cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() - 1 );
                     cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() - 1 );
 
-                    if ( record->Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED )
+                    if ( lastMouseState & FROM_LEFT_1ST_BUTTON_PRESSED && !record->Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED )
                     {
                         this->OnClickEvent();
                     }
+
+                    lastMouseState = record->Event.MouseEvent.dwButtonState;
                 }
 
                 if ( record->EventType == KEY_EVENT )
