@@ -12,6 +12,7 @@
 #include "strfunc.h"
 #include "PuzzleWord.h"
 #include "DifficultyLevel.h"
+#include "PlayerAction.h"
 
 HackingModel::HackingModel()
 {
@@ -22,14 +23,19 @@ HackingModel::HackingModel()
 
 HackingModel::~HackingModel()
 {
-    for ( unsigned int i = 0; i < this->puzzleWords.size(); ++i )
+    for ( int i = 0; i < (int)this->puzzleWords.size(); ++i )
     {
         delete this->puzzleWords[i];
     }
 
-    for ( unsigned int i = 0; i < this->difficultyLevels.size(); ++i )
+    for ( int i = 0; i < (int)this->difficultyLevels.size(); ++i )
     {
         delete this->difficultyLevels[i];
+    }
+
+    for ( int i = 0; i < (int)this->playerActionList.size(); ++i )
+    {
+        delete this->playerActionList[i];
     }
 }
 
@@ -80,6 +86,12 @@ PuzzleWord * const HackingModel::GetPuzzleWordAtPosition( int columnIndex, int r
 PuzzleWord * const HackingModel::GetPuzzleWordAtLetterPosition( const LetterPosition & letterPos ) const
 {
     return this->GetPuzzleWordAtPosition( letterPos.column, letterPos.y, letterPos.x );
+}
+
+PuzzleWord * HackingModel::GetAttemptedWord( int index ) const
+{
+    assert( index >= 0 && index < (int)this->attemptedWords.size() );
+    return this->attemptedWords[index];
 }
 
 DifficultyLevel * HackingModel::GetCurrentDifficulty() const
@@ -171,15 +183,28 @@ bool HackingModel::AttemptWord( PuzzleWord * const puzzleWord )
 
     if ( puzzleWord == this->solutionWord )
     {
+        this->playerActionList.push_back( new SuccessfulAttemptAction( puzzleWord ) );
         return true;
     }
     else
     {
-        --this->attemptsRemaining;
         this->attemptedWords.push_back( puzzleWord );
         puzzleWord->SetIsAttempted( true );
+        this->playerActionList.push_back( new FailedAttemptAction( puzzleWord, this->attemptsRemaining, this->GetCurrentDifficulty()->GetStartingAttemptCount() ) );
+        --this->attemptsRemaining;
         return false;
     }
+}
+
+PlayerAction const * HackingModel::GetPlayerAction( int index ) const
+{
+    assert( index >= 0 && index < (int)this->playerActionList.size() );
+    return this->playerActionList[index];
+}
+
+int HackingModel::GetPlayerActionCount() const
+{
+    return this->playerActionList.size();
 }
 
 void HackingModel::SetPuzzleWords()

@@ -7,7 +7,7 @@
 #include "HackingModel.h"
 #include "PuzzleWord.h"
 #include "DifficultyLevel.h"
-
+#include "PlayerAction.h"
 
 HackingView::HackingView( const HackingModel * const hackingModel ) : hackingModel( hackingModel )
 {
@@ -194,9 +194,19 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
         }
     }
 
-    for ( int i = 0; i < this->hackingModel->GetAttemptedWordCount(); ++i )
+    int attemptedWordOffset = 0;
+    for ( int i = this->hackingModel->GetPlayerActionCount() - 1; i >= 0; --i )
     {
-
+        PlayerAction const * playerAction = this->hackingModel->GetPlayerAction( i );
+        COORD coord = {this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1, this->GetScreenHeight() - 2 - attemptedWordOffset};
+        
+        for ( int j = 0; j < playerAction->GetDisplayHeight(); ++j )
+        {
+            this->RenderText( coord, "> " + playerAction->GetDisplayText(j), false );
+            coord.Y -= 1;
+        }
+        
+        attemptedWordOffset += playerAction->GetDisplayHeight();
     }
 
     const MatchingBracket * bracket = nullptr;

@@ -8,6 +8,7 @@
 #include "MatchingBracket.h"
 
 class DifficultyLevel;
+class PlayerAction;
 
 class HackingModel
 {
@@ -27,6 +28,8 @@ public:
     PuzzleWord * const GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const;
 
     PuzzleWord * const GetPuzzleWordAtLetterPosition( const LetterPosition& letterPos ) const;
+
+    PuzzleWord * GetAttemptedWord(int index) const;
 
     DifficultyLevel * GetCurrentDifficulty() const;
 
@@ -50,6 +53,9 @@ public:
 
     bool AttemptWord( PuzzleWord * const puzzleWord );
 
+    PlayerAction const * GetPlayerAction( int index ) const;
+    int GetPlayerActionCount() const;
+
 private:
     int attemptsRemaining;
 
@@ -59,6 +65,7 @@ private:
     std::vector<DifficultyLevel*> difficultyLevels;
     std::vector<std::vector<std::string>> fillerCharacters;
     std::vector<MatchingBracket> matchingBrackets;
+    std::vector<PlayerAction*> playerActionList;
 
     DifficultyLevel * currentDifficulty;
 
