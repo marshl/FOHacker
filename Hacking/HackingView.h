@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "PuzzleWord.h"
+#include "GameState.h"
 
 class HackingModel;
 class DifficultyLevel;
@@ -16,7 +17,7 @@ public:
     HackingView( const HackingModel * const hackingModel );
     ~HackingView();
 
-    void Render( COORD cursorCoord );
+    void Render( GameState state, COORD cursorCoord );
 
     void SetOutputHandle( HANDLE handle );
 
@@ -50,7 +51,7 @@ private:
 
     void ClearBuffer();
 
-    void RefreshBuffer( COORD cursorCoord );
+    void RefreshBuffer( GameState state, COORD cursorCoord );
 
     void RenderDifficultyScreen( COORD cursorCoord );
     void RenderGameScreen( COORD cursorCoord );

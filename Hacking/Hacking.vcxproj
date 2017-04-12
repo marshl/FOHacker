@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DifficultyLevel.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="HackingController.h" />
     <ClInclude Include="HackingModel.h" />
     <ClInclude Include="HackingView.h" />

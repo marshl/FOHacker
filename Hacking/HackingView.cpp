@@ -30,10 +30,10 @@ HackingView::~HackingView()
 {
 }
 
-void HackingView::Render( COORD cursorCoord )
+void HackingView::Render( GameState state, COORD cursorCoord )
 {
     this->ClearBuffer();
-    this->RefreshBuffer( cursorCoord );
+    this->RefreshBuffer( state, cursorCoord );
 
     const WORD NORMAL_CHAR_ATTRIBUTES = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
     const WORD HIGHLIGHTED_CHAR_ATTRIBUTES = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
@@ -118,15 +118,20 @@ void HackingView::ClearBuffer()
     this->highlightBuffer.resize( this->GetScreenHeight(), std::vector<bool>( this->GetScreenWidth(), false ) );
 }
 
-void HackingView::RefreshBuffer( COORD cursorCoord )
+void HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
 {
-    if ( this->hackingModel->GetCurrentDifficulty() == nullptr )
+    switch ( state )
+    {
+    case GameState::DIFFICULTY_SELECTION:
     {
         this->RenderDifficultyScreen( cursorCoord );
+        break;
     }
-    else
+    case GameState::PLAYING_GAME:
     {
         this->RenderGameScreen( cursorCoord );
+        break;
+    }
     }
 }
 

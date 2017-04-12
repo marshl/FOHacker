@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include "GameState.h"
+
 class HackingModel;
 class HackingView;
 class PuzzleWord;
@@ -20,6 +22,8 @@ public:
 private:
     HackingView* hackingView;
     HackingModel* hackingModel;
+
+    GameState currentState;
 
     COORD cursorCoord;
 

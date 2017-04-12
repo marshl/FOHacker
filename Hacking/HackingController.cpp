@@ -31,6 +31,8 @@ HackingController::HackingController( HackingModel* hackingModel, HackingView* h
     this->hackingView->SetOutputHandle( outputHandle );
 
     this->cursorCoord = {0, 0};
+
+    this->currentState = GameState::DIFFICULTY_SELECTION;
 }
 
 HackingController::~HackingController()
@@ -116,7 +118,7 @@ void HackingController::Run()
             }
         }
 
-        this->hackingView->Render( this->cursorCoord );
+        this->hackingView->Render( this->currentState, this->cursorCoord );
         Sleep( 1000 / 24 );
     }
 }
@@ -124,15 +126,20 @@ void HackingController::Run()
 
 void HackingController::OnClickEvent()
 {
-    if ( this->hackingModel->GetCurrentDifficulty() == nullptr )
+    switch ( this->currentState )
+    {
+    case GameState::DIFFICULTY_SELECTION:
     {
         DifficultyLevel * cursorDifficulty = this->hackingView->GetDifficultyAtCoord( this->cursorCoord );
         if ( cursorDifficulty != nullptr )
         {
             this->hackingModel->SetDifficultyLevel( cursorDifficulty );
+            this->currentState = GameState::PLAYING_GAME;
         }
+
+        break;
     }
-    else
+    case GameState::PLAYING_GAME:
     {
         LetterPosition letterPos;
         if ( this->hackingView->CoordToLetterPosition( this->cursorCoord, letterPos ) )
@@ -143,9 +150,12 @@ void HackingController::OnClickEvent()
             {
                 if ( this->hackingModel->AttemptWord( puzzleWord ) )
                 {
-                    exit( 0 );
+                    this->currentState = GameState::GAME_COMPLETE;
                 }
             }
         }
+
+        break;
+    }
     }
 }
