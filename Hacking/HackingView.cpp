@@ -128,8 +128,9 @@ void HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
         break;
     }
     case GameState::PLAYING_GAME:
+    case GameState::GAME_COMPLETE:
     {
-        this->RenderGameScreen( cursorCoord );
+        this->RenderGameScreen( state, cursorCoord );
         break;
     }
     }
@@ -150,7 +151,7 @@ void HackingView::RenderDifficultyScreen( COORD cursorCoord )
     this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
 }
 
-void HackingView::RenderGameScreen( COORD cursorCoord )
+void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
 {
     for ( int i = 0; i < ( int )this->GetIntroText().size(); ++i )
     {
@@ -186,14 +187,6 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
         }
     }
 
-    for ( int y = 0; y < this->GetScreenHeight(); ++y )
-    {
-        for ( int x = 0; x < this->GetScreenWidth(); ++x )
-        {
-            this->highlightBuffer[y][x] = false;
-        }
-    }
-
     int attemptedWordOffset = 0;
     for ( int i = this->hackingModel->GetPlayerActionCount() - 1; i >= 0; --i )
     {
@@ -226,51 +219,54 @@ void HackingView::RenderGameScreen( COORD cursorCoord )
         }
     }
 
-    if ( bracket != nullptr )
+    if ( state == GameState::PLAYING_GAME )
     {
-        for ( int position = bracket->GetStartingPosition(); position <= bracket->GetEndingPosition(); ++position )
+        if ( bracket != nullptr )
         {
-            COORD coord = this->ColumnPositionToCoord( bracket->GetColumn(), bracket->GetRow(), position );
-            this->highlightBuffer[coord.Y][coord.X] = true;
-        }
-    }
-
-    PuzzleWord* selectedPuzzleWord = nullptr;
-    for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
-    {
-        PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWord( i );
-
-        if ( this->IsCoordInPuzzleWord( cursorCoord, puzzleWord ) )
-        {
-            selectedPuzzleWord = puzzleWord;
-            for ( int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j )
+            for ( int position = bracket->GetStartingPosition(); position <= bracket->GetEndingPosition(); ++position )
             {
-                COORD& pos = this->LetterPositionToCoord( puzzleWord->GetLetterPosition( j ) );
-                this->highlightBuffer[pos.Y][pos.X] = true;
+                COORD coord = this->ColumnPositionToCoord( bracket->GetColumn(), bracket->GetRow(), position );
+                this->highlightBuffer[coord.Y][coord.X] = true;
             }
         }
+
+        PuzzleWord* selectedPuzzleWord = nullptr;
+        for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
+        {
+            PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWord( i );
+
+            if ( this->IsCoordInPuzzleWord( cursorCoord, puzzleWord ) )
+            {
+                selectedPuzzleWord = puzzleWord;
+                for ( int j = 0; j < this->hackingModel->GetCurrentDifficulty()->GetWordLength(); ++j )
+                {
+                    COORD& pos = this->LetterPositionToCoord( puzzleWord->GetLetterPosition( j ) );
+                    this->highlightBuffer[pos.Y][pos.X] = true;
+                }
+            }
+        }
+
+        if ( selectedPuzzleWord != nullptr )
+        {
+            std::ostringstream outstr;
+            outstr << "> " << selectedPuzzleWord->GetText();
+
+            this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1,
+                outstr.str().length(),
+                outstr.str() );
+        }
+        else
+        {
+            std::ostringstream outstr;
+            outstr << "> ";
+
+            this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth()* this->hackingModel->GetColumnCount() + 1,
+                outstr.str().length(),
+                outstr.str() );
+        }
+
+        this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
     }
-
-    if ( selectedPuzzleWord != nullptr )
-    {
-        std::ostringstream outstr;
-        outstr << "> " << selectedPuzzleWord->GetText();
-
-        this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1,
-            outstr.str().length(),
-            outstr.str() );
-    }
-    else
-    {
-        std::ostringstream outstr;
-        outstr << "> ";
-
-        this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth()* this->hackingModel->GetColumnCount() + 1,
-            outstr.str().length(),
-            outstr.str() );
-    }
-
-    this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
 }
 
 void HackingView::RenderText( COORD position, std::string text, bool isHighlighted )

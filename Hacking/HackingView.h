@@ -54,7 +54,7 @@ private:
     void RefreshBuffer( GameState state, COORD cursorCoord );
 
     void RenderDifficultyScreen( COORD cursorCoord );
-    void RenderGameScreen( COORD cursorCoord );
+    void RenderGameScreen( GameState state, COORD cursorCoord );
 
     void RenderText( COORD position, std::string text, bool isHighlighted );
 
