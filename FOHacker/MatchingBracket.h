@@ -13,6 +13,9 @@ public:
     int GetStartingPosition() const;
     int GetEndingPosition() const;
 
+    bool IsConsumed() const;
+    void Consume();
+
 private:
 
     char openingSymbol;
@@ -23,5 +26,7 @@ private:
 
     int startingPosition;
     int endingPosition;
+
+    bool isConsumed;
 };
 

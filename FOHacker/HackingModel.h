@@ -28,6 +28,8 @@ public:
 
     PuzzleWord const * GetPuzzleWordAtLetterPosition( const LetterPosition& letterPos ) const;
 
+    MatchingBracket const * GetMatchingBracketAtLetterPosition( const LetterPosition& letterPos ) const;
+
     DifficultyLevel * GetCurrentDifficulty() const;
 
     DifficultyLevel * GetDifficultyLevelWithIndex( int index ) const;
@@ -46,9 +48,10 @@ public:
     const std::string& GetFillerText( int columnIndex, int rowIndex ) const;
 
     int GetMatchingBracketCount() const;
-    const MatchingBracket& GetMatchingBracket( int matchingBracketIndex ) const;
+    MatchingBracket const * GetMatchingBracket( int matchingBracketIndex ) const;
 
     bool AttemptWord( PuzzleWord const * puzzleWord );
+    void AttemptMatchingBracket( MatchingBracket const * matchingBracket );
 
     PlayerAction const * GetPlayerAction( int index ) const;
     int GetPlayerActionCount() const;
@@ -60,7 +63,7 @@ private:
     PuzzleWord* solutionWord;
     std::vector<DifficultyLevel*> difficultyLevels;
     std::vector<std::vector<std::string>> fillerCharacters;
-    std::vector<MatchingBracket> matchingBrackets;
+    std::vector<MatchingBracket*> matchingBrackets;
     std::vector<PlayerAction*> playerActionList;
 
     DifficultyLevel * currentDifficulty;
@@ -73,7 +76,7 @@ private:
 
     void SetupMatchingBrackets();
 
-    std::vector<MatchingBracket> GetMatchingBracketsForLine( int columnIndex, int rowIndex );
+    std::vector<MatchingBracket *> GetMatchingBracketsForLine( int columnIndex, int rowIndex );
 };
 
 #endif

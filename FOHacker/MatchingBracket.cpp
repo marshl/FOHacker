@@ -20,6 +20,8 @@ MatchingBracket::MatchingBracket( char openingSymbol, char closingSymbol, int co
     assert( endingPosition >= 0 );
     this->endingPosition = endingPosition;
 
+    this->isConsumed = false;
+
 }
 
 char MatchingBracket::GetOpeningSymbol() const
@@ -50,4 +52,14 @@ int MatchingBracket::GetStartingPosition() const
 int MatchingBracket::GetEndingPosition() const
 {
     return this->endingPosition;
+}
+
+bool MatchingBracket::IsConsumed() const
+{
+    return this->isConsumed;
+}
+
+void MatchingBracket::Consume()
+{
+    this->isConsumed = true;
 }

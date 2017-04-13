@@ -157,6 +157,13 @@ void HackingController::OnClickEvent()
                     this->currentState = GameState::GAME_COMPLETE;
                 }
             }
+
+            MatchingBracket const * matchingBracket = this->hackingModel->GetMatchingBracketAtLetterPosition( letterPos );
+
+            if ( matchingBracket != nullptr )
+            {
+                this->hackingModel->AttemptMatchingBracket( matchingBracket );
+            }
         }
 
         break;

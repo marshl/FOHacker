@@ -23,19 +23,24 @@ HackingModel::HackingModel()
 
 HackingModel::~HackingModel()
 {
-    for ( int i = 0; i < (int)this->puzzleWords.size(); ++i )
+    for ( int i = 0; i < ( int )this->puzzleWords.size(); ++i )
     {
         delete this->puzzleWords[i];
     }
 
-    for ( int i = 0; i < (int)this->difficultyLevels.size(); ++i )
+    for ( int i = 0; i < ( int )this->difficultyLevels.size(); ++i )
     {
         delete this->difficultyLevels[i];
     }
 
-    for ( int i = 0; i < (int)this->playerActionList.size(); ++i )
+    for ( int i = 0; i < ( int )this->playerActionList.size(); ++i )
     {
         delete this->playerActionList[i];
+    }
+
+    for ( int i = 0; i < ( int )this->matchingBrackets.size(); ++i )
+    {
+        delete this->matchingBrackets[i];
     }
 }
 
@@ -81,6 +86,20 @@ PuzzleWord const * HackingModel::GetPuzzleWordAtPosition( int columnIndex, int r
 PuzzleWord const * HackingModel::GetPuzzleWordAtLetterPosition( const LetterPosition & letterPos ) const
 {
     return this->GetPuzzleWordAtPosition( letterPos.column, letterPos.y, letterPos.x );
+}
+
+MatchingBracket const * HackingModel::GetMatchingBracketAtLetterPosition( const LetterPosition& letterPos ) const
+{
+    for ( int i = 0; i < ( int )this->matchingBrackets.size(); ++i )
+    {
+        MatchingBracket const * bracket = this->matchingBrackets[i];
+        if ( bracket->GetColumn() == letterPos.column && bracket->GetRow() == letterPos.y && bracket->GetStartingPosition() == letterPos.x )
+        {
+            return bracket;
+        }
+    }
+
+    return nullptr;
 }
 
 DifficultyLevel * HackingModel::GetCurrentDifficulty() const
@@ -159,7 +178,7 @@ int HackingModel::GetMatchingBracketCount() const
     return this->matchingBrackets.size();
 }
 
-const MatchingBracket & HackingModel::GetMatchingBracket( int matchingBracketIndex ) const
+MatchingBracket const * HackingModel::GetMatchingBracket( int matchingBracketIndex ) const
 {
     assert( matchingBracketIndex >= 0 && matchingBracketIndex < this->GetMatchingBracketCount() );
     return this->matchingBrackets[matchingBracketIndex];
@@ -169,7 +188,7 @@ bool HackingModel::AttemptWord( PuzzleWord const *  puzzleWord )
 {
     assert( this->solutionWord != nullptr );
     assert( std::find( this->puzzleWords.begin(), this->puzzleWords.end(), puzzleWord ) != this->puzzleWords.end() );
-    
+
     // Find the internal version of that word so it can be modified
     PuzzleWord * localWord = *std::find( this->puzzleWords.begin(), this->puzzleWords.end(), puzzleWord );
 
@@ -187,9 +206,31 @@ bool HackingModel::AttemptWord( PuzzleWord const *  puzzleWord )
     }
 }
 
+void HackingModel::AttemptMatchingBracket( MatchingBracket const * matchingBracket )
+{
+    assert( !matchingBracket->IsConsumed() );
+    assert( matchingBracket != nullptr );
+    assert( std::find( this->matchingBrackets.begin(), this->matchingBrackets.end(), matchingBracket ) != this->matchingBrackets.end() );
+
+    MatchingBracket * localBracket = *std::find( this->matchingBrackets.begin(), this->matchingBrackets.end(), matchingBracket );
+
+    float randVal = (float)rand() / (float)RAND_MAX;
+
+    if ( randVal > 0.75f )
+    {
+        this->attemptsRemaining = this->GetCurrentDifficulty()->GetStartingAttemptCount();
+    }
+    else
+    {
+        
+    }
+    
+    localBracket->Consume();
+}
+
 PlayerAction const * HackingModel::GetPlayerAction( int index ) const
 {
-    assert( index >= 0 && index < (int)this->playerActionList.size() );
+    assert( index >= 0 && index < ( int )this->playerActionList.size() );
     return this->playerActionList[index];
 }
 
@@ -357,7 +398,7 @@ void HackingModel::SetupMatchingBrackets()
     {
         for ( int rowIndex = 0; rowIndex < this->GetColumnHeight(); ++rowIndex )
         {
-            std::vector<MatchingBracket> brackets = this->GetMatchingBracketsForLine( columnIndex, rowIndex );
+            std::vector<MatchingBracket *> brackets = this->GetMatchingBracketsForLine( columnIndex, rowIndex );
             this->matchingBrackets.insert( this->matchingBrackets.end(), brackets.begin(), brackets.end() );
         }
     }
@@ -367,9 +408,9 @@ void HackingModel::SetupMatchingBrackets()
     {
         for ( int j = i + 1; j < ( int )this->matchingBrackets.size(); ++j )
         {
-            MatchingBracket& a = this->matchingBrackets[i];
-            MatchingBracket& b = this->matchingBrackets[j];
-            if ( a.GetColumn() == b.GetColumn() && a.GetRow() == b.GetRow() && a.GetStartingPosition() == b.GetStartingPosition() )
+            MatchingBracket const * a = this->matchingBrackets[i];
+            MatchingBracket const * b = this->matchingBrackets[j];
+            if ( a->GetColumn() == b->GetColumn() && a->GetRow() == b->GetRow() && a->GetStartingPosition() == b->GetStartingPosition() )
             {
                 assert( false );
             }
@@ -379,10 +420,11 @@ void HackingModel::SetupMatchingBrackets()
 
     for ( int i = 0; i < ( int )this->matchingBrackets.size(); )
     {
-        MatchingBracket& bracket = this->matchingBrackets[i];
-        if ( this->GetPuzzleWordAtPosition( bracket.GetColumn(), bracket.GetRow(), bracket.GetStartingPosition() ) != nullptr
-            || this->GetPuzzleWordAtPosition( bracket.GetColumn(), bracket.GetRow(), bracket.GetEndingPosition() ) != nullptr )
+        MatchingBracket const * bracket = this->matchingBrackets[i];
+        if ( this->GetPuzzleWordAtPosition( bracket->GetColumn(), bracket->GetRow(), bracket->GetStartingPosition() ) != nullptr
+            || this->GetPuzzleWordAtPosition( bracket->GetColumn(), bracket->GetRow(), bracket->GetEndingPosition() ) != nullptr )
         {
+            delete this->matchingBrackets[i];
             this->matchingBrackets.erase( this->matchingBrackets.begin() + i );
         }
         else
@@ -392,9 +434,9 @@ void HackingModel::SetupMatchingBrackets()
     }
 }
 
-std::vector<MatchingBracket> HackingModel::GetMatchingBracketsForLine( int columnIndex, int rowIndex )
+std::vector<MatchingBracket *> HackingModel::GetMatchingBracketsForLine( int columnIndex, int rowIndex )
 {
-    std::vector<MatchingBracket> result;
+    std::vector<MatchingBracket *> result;
 
     const std::string validStartingChars = "<{[(";
     const std::string validEndingChars = ">}])";
@@ -414,7 +456,7 @@ std::vector<MatchingBracket> HackingModel::GetMatchingBracketsForLine( int colum
                 char openingSymbol = fillerText[openingOffset];
                 char closingSymbol = fillerText[closingOffset];
 
-                MatchingBracket match( openingSymbol, closingSymbol, columnIndex, rowIndex, openingOffset, closingOffset );
+                MatchingBracket * match = new MatchingBracket( openingSymbol, closingSymbol, columnIndex, rowIndex, openingOffset, closingOffset );
                 result.push_back( match );
             }
 
