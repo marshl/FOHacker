@@ -265,7 +265,12 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
                 outstr.str() );
         }
 
-        this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
+        // Highlight the cursor position if it is within the columns
+        LetterPosition letterPos;
+        if ( this->CoordToLetterPosition( cursorCoord, letterPos ) )
+        {
+            this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
+        }
     }
 }
 
