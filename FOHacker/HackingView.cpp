@@ -192,10 +192,10 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
     {
         PlayerAction const * playerAction = this->hackingModel->GetPlayerAction( i );
         COORD coord = {this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1, this->GetScreenHeight() - 2 - attemptedWordOffset};
-        
+
         for ( int j = 0; j < playerAction->GetDisplayHeight(); ++j )
         {
-            this->RenderText( coord, "> " + playerAction->GetDisplayText(j), false );
+            this->RenderText( coord, "> " + playerAction->GetDisplayText( j ), false );
             --coord.Y;
             ++attemptedWordOffset;
             if ( attemptedWordOffset > this->hackingModel->GetColumnHeight() - 2 )
@@ -206,21 +206,23 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
         }
     }
 
-    const MatchingBracket * bracket = nullptr;
-    for ( int i = 0; i < this->hackingModel->GetMatchingBracketCount(); ++i )
-    {
-        const MatchingBracket& matchingBracket = this->hackingModel->GetMatchingBracket( i );
-
-        COORD startingCoord = this->ColumnPositionToCoord( matchingBracket.GetColumn(), matchingBracket.GetRow(), matchingBracket.GetStartingPosition() );
-        if ( startingCoord.X == cursorCoord.X && startingCoord.Y == cursorCoord.Y )
-        {
-            bracket = &matchingBracket;
-            break;
-        }
-    }
+   
 
     if ( state == GameState::PLAYING_GAME )
     {
+        const MatchingBracket * bracket = nullptr;
+        for ( int i = 0; i < this->hackingModel->GetMatchingBracketCount(); ++i )
+        {
+            const MatchingBracket& matchingBracket = this->hackingModel->GetMatchingBracket( i );
+
+            COORD startingCoord = this->ColumnPositionToCoord( matchingBracket.GetColumn(), matchingBracket.GetRow(), matchingBracket.GetStartingPosition() );
+            if ( startingCoord.X == cursorCoord.X && startingCoord.Y == cursorCoord.Y )
+            {
+                bracket = &matchingBracket;
+                break;
+            }
+        }
+
         if ( bracket != nullptr )
         {
             for ( int position = bracket->GetStartingPosition(); position <= bracket->GetEndingPosition(); ++position )
@@ -230,10 +232,10 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
             }
         }
 
-        PuzzleWord* selectedPuzzleWord = nullptr;
+        PuzzleWord const * selectedPuzzleWord = nullptr;
         for ( int i = 0; i < this->hackingModel->GetPuzzleWordCount(); ++i )
         {
-            PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWord( i );
+            PuzzleWord const * puzzleWord = this->hackingModel->GetPuzzleWord( i );
 
             if ( this->IsCoordInPuzzleWord( cursorCoord, puzzleWord ) )
             {
@@ -354,7 +356,7 @@ void HackingView::RenderLetterPositionOfCoord( COORD coord )
     this->RenderText( {0,0}, ostream.str(), hl );
 }
 
-bool HackingView::IsCoordInPuzzleWord( COORD coord, PuzzleWord * puzzleWord ) const
+bool HackingView::IsCoordInPuzzleWord( COORD coord, PuzzleWord const * puzzleWord ) const
 {
     for ( int i = 0; i < (int)puzzleWord->GetText().size(); ++i )
     {

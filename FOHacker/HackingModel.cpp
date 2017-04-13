@@ -44,27 +44,22 @@ int HackingModel::GetAttemptsRemaining() const
     return this->attemptsRemaining;
 }
 
-const int HackingModel::GetPuzzleWordCount() const
+int HackingModel::GetPuzzleWordCount() const
 {
     return this->puzzleWords.size();
 }
 
-const int HackingModel::GetAttemptedWordCount() const
-{
-    return this->attemptedWords.size();
-}
-
-PuzzleWord * const HackingModel::GetSolutionWord() const
+PuzzleWord const * HackingModel::GetSolutionWord() const
 {
     return this->solutionWord;
 }
 
-PuzzleWord * const HackingModel::GetPuzzleWord( int index ) const
+PuzzleWord const * HackingModel::GetPuzzleWord( int index ) const
 {
     return this->puzzleWords[index];
 }
 
-PuzzleWord * const HackingModel::GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const
+PuzzleWord const * HackingModel::GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const
 {
     for ( int wordIndex = 0; wordIndex < ( int )this->puzzleWords.size(); ++wordIndex )
     {
@@ -83,15 +78,9 @@ PuzzleWord * const HackingModel::GetPuzzleWordAtPosition( int columnIndex, int r
     return nullptr;
 }
 
-PuzzleWord * const HackingModel::GetPuzzleWordAtLetterPosition( const LetterPosition & letterPos ) const
+PuzzleWord const * HackingModel::GetPuzzleWordAtLetterPosition( const LetterPosition & letterPos ) const
 {
     return this->GetPuzzleWordAtPosition( letterPos.column, letterPos.y, letterPos.x );
-}
-
-PuzzleWord * HackingModel::GetAttemptedWord( int index ) const
-{
-    assert( index >= 0 && index < (int)this->attemptedWords.size() );
-    return this->attemptedWords[index];
 }
 
 DifficultyLevel * HackingModel::GetCurrentDifficulty() const
@@ -121,32 +110,32 @@ void HackingModel::SetDifficultyLevel( DifficultyLevel * difficulty )
     this->attemptsRemaining = this->currentDifficulty->GetStartingAttemptCount();
 }
 
-const int HackingModel::GetColumnWidth() const
+int HackingModel::GetColumnWidth() const
 {
     return 12;
 }
 
-const int HackingModel::GetColumnHeight() const
+int HackingModel::GetColumnHeight() const
 {
     return 17;
 }
 
-const int HackingModel::GetColumnCount() const
+int HackingModel::GetColumnCount() const
 {
     return 2;
 }
 
-const int HackingModel::GetTotalLineCount() const
+int HackingModel::GetTotalLineCount() const
 {
     return this->GetColumnHeight() * this->GetColumnCount();
 }
 
-const int HackingModel::GetTotalColumnCharacterCount() const
+int HackingModel::GetTotalColumnCharacterCount() const
 {
     return this->GetColumnCount() * this->GetColumnWidth() * this->GetColumnHeight();;
 }
 
-const int HackingModel::GetMaximumWordLength() const
+int HackingModel::GetMaximumWordLength() const
 {
     int maximumLength = 0;
     for ( int i = 0; i < ( int )this->difficultyLevels.size(); ++i )
@@ -165,7 +154,7 @@ const std::string& HackingModel::GetFillerText( int columnIndex, int rowIndex ) 
     return this->fillerCharacters[columnIndex][rowIndex];
 }
 
-const int HackingModel::GetMatchingBracketCount() const
+int HackingModel::GetMatchingBracketCount() const
 {
     return this->matchingBrackets.size();
 }
@@ -176,20 +165,22 @@ const MatchingBracket & HackingModel::GetMatchingBracket( int matchingBracketInd
     return this->matchingBrackets[matchingBracketIndex];
 }
 
-bool HackingModel::AttemptWord( PuzzleWord * const puzzleWord )
+bool HackingModel::AttemptWord( PuzzleWord const *  puzzleWord )
 {
     assert( this->solutionWord != nullptr );
     assert( std::find( this->puzzleWords.begin(), this->puzzleWords.end(), puzzleWord ) != this->puzzleWords.end() );
+    
+    // Find the internal version of that word so it can be modified
+    PuzzleWord * localWord = *std::find( this->puzzleWords.begin(), this->puzzleWords.end(), puzzleWord );
 
-    if ( puzzleWord == this->solutionWord )
+    if ( localWord == this->solutionWord )
     {
         this->playerActionList.push_back( new SuccessfulAttemptAction( puzzleWord ) );
         return true;
     }
     else
     {
-        this->attemptedWords.push_back( puzzleWord );
-        puzzleWord->SetIsAttempted( true );
+        localWord->SetIsAttempted( true );
         this->playerActionList.push_back( new FailedAttemptAction( puzzleWord, this->attemptsRemaining, this->GetCurrentDifficulty()->GetStartingAttemptCount() ) );
         --this->attemptsRemaining;
         return false;
@@ -283,7 +274,7 @@ void HackingModel::PlacePuzzleWords()
 
     for ( unsigned int puzzleWordIndex = 0; puzzleWordIndex < puzzleWords.size(); )
     {
-        PuzzleWord* puzzleWord = this->GetPuzzleWord( puzzleWordIndex );
+        PuzzleWord * puzzleWord = this->puzzleWords[puzzleWordIndex];
 
         // Theoretically, this might go infinite with the right conditions
         int place = rand() % ( this->GetTotalColumnCharacterCount() - this->GetCurrentDifficulty()->GetWordLength() );

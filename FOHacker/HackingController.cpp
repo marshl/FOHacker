@@ -148,7 +148,7 @@ void HackingController::OnClickEvent()
         LetterPosition letterPos;
         if ( this->hackingView->CoordToLetterPosition( this->cursorCoord, letterPos ) )
         {
-            PuzzleWord* puzzleWord = this->hackingModel->GetPuzzleWordAtLetterPosition( letterPos );
+            PuzzleWord const * puzzleWord = this->hackingModel->GetPuzzleWordAtLetterPosition( letterPos );
 
             if ( puzzleWord != nullptr )
             {

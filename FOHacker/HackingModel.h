@@ -18,18 +18,15 @@ public:
 
     int GetAttemptsRemaining() const;
 
-    const int GetPuzzleWordCount() const;
-    const int GetAttemptedWordCount() const;
+    int GetPuzzleWordCount() const;
 
-    PuzzleWord * const GetSolutionWord() const;
+    PuzzleWord const * GetSolutionWord() const;
 
-    PuzzleWord * const GetPuzzleWord( int index ) const;
+    PuzzleWord const * GetPuzzleWord( int index ) const;
 
-    PuzzleWord * const GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const;
+    PuzzleWord const * GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const;
 
-    PuzzleWord * const GetPuzzleWordAtLetterPosition( const LetterPosition& letterPos ) const;
-
-    PuzzleWord * GetAttemptedWord(int index) const;
+    PuzzleWord const * GetPuzzleWordAtLetterPosition( const LetterPosition& letterPos ) const;
 
     DifficultyLevel * GetCurrentDifficulty() const;
 
@@ -38,20 +35,20 @@ public:
 
     void SetDifficultyLevel( DifficultyLevel * difficulty );
 
-    const int GetColumnWidth() const;
-    const int GetColumnHeight() const;
-    const int GetColumnCount() const;
-    const int GetTotalLineCount() const;
-    const int GetTotalColumnCharacterCount() const;
+    int GetColumnWidth() const;
+    int GetColumnHeight() const;
+    int GetColumnCount() const;
+    int GetTotalLineCount() const;
+    int GetTotalColumnCharacterCount() const;
 
-    const int GetMaximumWordLength() const;
+    int GetMaximumWordLength() const;
 
     const std::string& GetFillerText( int columnIndex, int rowIndex ) const;
 
-    const int GetMatchingBracketCount() const;
+    int GetMatchingBracketCount() const;
     const MatchingBracket& GetMatchingBracket( int matchingBracketIndex ) const;
 
-    bool AttemptWord( PuzzleWord * const puzzleWord );
+    bool AttemptWord( PuzzleWord const * puzzleWord );
 
     PlayerAction const * GetPlayerAction( int index ) const;
     int GetPlayerActionCount() const;
@@ -61,7 +58,6 @@ private:
 
     std::vector<PuzzleWord * > puzzleWords;
     PuzzleWord* solutionWord;
-    std::vector<PuzzleWord * > attemptedWords;
     std::vector<DifficultyLevel*> difficultyLevels;
     std::vector<std::vector<std::string>> fillerCharacters;
     std::vector<MatchingBracket> matchingBrackets;

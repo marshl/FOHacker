@@ -31,7 +31,7 @@ public:
 
     bool CoordToLetterPosition( COORD coord, LetterPosition& ) const;
 
-    bool IsCoordInPuzzleWord( COORD coord, PuzzleWord* puzzleWord ) const;
+    bool IsCoordInPuzzleWord( COORD coord, PuzzleWord const * puzzleWord ) const;
 
 private:
     const HackingModel * const hackingModel;
