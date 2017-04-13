@@ -33,11 +33,16 @@ public:
 
     int GetDifferenceFromSolution() const;
 
+    bool IsRemoved() const;
+
+    void Remove();
+
 private:
     std::string text;
     bool isAttempted;
     int position;
     int differenceFromSolution;
+    bool isRemoved;
 
     std::vector<ModelCoordinate> letterPositions;
 };

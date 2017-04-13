@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-PuzzleWord::PuzzleWord( std::string text, std::string solution ) : text( text ), isAttempted( false ), position( -1 ), differenceFromSolution( 0 )
+PuzzleWord::PuzzleWord( std::string text, std::string solution ) : text( text ), isAttempted( false ), position( -1 ), differenceFromSolution( 0 ), isRemoved( false )
 {
     this->letterPositions.resize( text.length(), {0, 0} );
 
@@ -60,4 +60,15 @@ void PuzzleWord::SetIsAttempted( bool attempted )
 int PuzzleWord::GetDifferenceFromSolution() const
 {
     return this->differenceFromSolution;
+}
+
+bool PuzzleWord::IsRemoved() const
+{
+    return this->isRemoved;
+}
+
+void PuzzleWord::Remove()
+{
+    assert( this->differenceFromSolution != 0 );
+    this->isRemoved = true;
 }

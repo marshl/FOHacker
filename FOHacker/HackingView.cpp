@@ -183,7 +183,8 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
         {
             ModelCoordinate letterPos = puzzleWord->GetLetterPosition( j );
             COORD coord = this->LetterPositionToCoord( letterPos );
-            this->characterBuffer[coord.Y][coord.X] = puzzleWord->GetText()[j];
+            char character = puzzleWord->IsRemoved() ? '.' : puzzleWord->GetText()[j];
+            this->characterBuffer[coord.Y][coord.X] = character;
         }
     }
 

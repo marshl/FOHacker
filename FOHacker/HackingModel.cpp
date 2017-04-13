@@ -69,6 +69,12 @@ PuzzleWord const * HackingModel::GetPuzzleWordAtPosition( int columnIndex, int r
     for ( int wordIndex = 0; wordIndex < ( int )this->puzzleWords.size(); ++wordIndex )
     {
         PuzzleWord * const puzzleWord = this->puzzleWords[wordIndex];
+
+        if ( puzzleWord->IsRemoved() )
+        {
+            continue;
+        }
+
         for ( int letterIndex = 0; letterIndex < (int)puzzleWord->GetText().size(); ++letterIndex )
         {
             const ModelCoordinate& letterPos = puzzleWord->GetLetterPosition( letterIndex );
@@ -216,15 +222,29 @@ void HackingModel::AttemptBracketPair( BracketPair const * bracketPair )
 
     float randVal = (float)rand() / (float)RAND_MAX;
 
-    if ( randVal > 0.75f )
+    if ( randVal < 0.25f )
     {
         this->attemptsRemaining = this->GetCurrentDifficulty()->GetStartingAttemptCount();
     }
     else
     {
-        
+        std::vector<PuzzleWord *> possibleDuds;
+        for ( int i = 0; i < this->puzzleWords.size(); ++i )
+        {
+            PuzzleWord * puzzleWord = this->puzzleWords[i];
+            if ( puzzleWord != this->solutionWord && !puzzleWord->IsRemoved() )
+            {
+                possibleDuds.push_back( puzzleWord );
+            }
+        }
+
+        if ( possibleDuds.size() > 0 )
+        {
+            std::random_shuffle( possibleDuds.begin(), possibleDuds.end() );
+            possibleDuds.front()->Remove();
+        }
     }
-    
+
     localBracket->Consume();
 }
 
