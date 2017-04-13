@@ -29,7 +29,7 @@ public:
 
     DifficultyLevel * GetDifficultyAtCoord( COORD coord ) const;
 
-    bool CoordToLetterPosition( COORD coord, LetterPosition& ) const;
+    bool ConvertViewSpaceToModelSpace( COORD coord, ModelCoordinate& ) const;
 
 private:
     const HackingModel * const hackingModel;
@@ -63,7 +63,7 @@ private:
     void SetHexAddresses();
 
     COORD ColumnPositionToCoord( int columnIndex, int rowIndex, int position ) const;
-    COORD LetterPositionToCoord( LetterPosition letterPos ) const;
+    COORD LetterPositionToCoord( ModelCoordinate letterPos ) const;
     void RenderLetterPositionOfCoord( COORD coord );
 };
 

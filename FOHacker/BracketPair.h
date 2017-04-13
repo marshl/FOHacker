@@ -1,8 +1,11 @@
-#pragma once
-class MatchingBracket
+#ifndef BRACKET_PAIR_H_
+#define BRACKET_PAIR_H_
+
+
+class BracketPair
 {
 public:
-    MatchingBracket( char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition );
+    BracketPair( char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition );
 
     char GetOpeningSymbol() const;
     char GetClosingSymbol() const;
@@ -30,3 +33,4 @@ private:
     bool isConsumed;
 };
 
+#endif

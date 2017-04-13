@@ -1,8 +1,8 @@
-#include "MatchingBracket.h"
+#include "BracketPair.h"
 
 #include <cassert>
 
-MatchingBracket::MatchingBracket( char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition )
+BracketPair::BracketPair( char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition )
 {
     this->openingSymbol = openingSymbol;
     this->closingSymbol = closingSymbol;
@@ -24,42 +24,42 @@ MatchingBracket::MatchingBracket( char openingSymbol, char closingSymbol, int co
 
 }
 
-char MatchingBracket::GetOpeningSymbol() const
+char BracketPair::GetOpeningSymbol() const
 {
     return this->openingSymbol;
 }
 
-char MatchingBracket::GetClosingSymbol() const
+char BracketPair::GetClosingSymbol() const
 {
     return this->closingSymbol;
 }
 
-int MatchingBracket::GetColumn() const
+int BracketPair::GetColumn() const
 {
     return this->column;
 }
 
-int MatchingBracket::GetRow() const
+int BracketPair::GetRow() const
 {
     return this->row;
 }
 
-int MatchingBracket::GetStartingPosition() const
+int BracketPair::GetStartingPosition() const
 {
     return this->startingPosition;
 }
 
-int MatchingBracket::GetEndingPosition() const
+int BracketPair::GetEndingPosition() const
 {
     return this->endingPosition;
 }
 
-bool MatchingBracket::IsConsumed() const
+bool BracketPair::IsConsumed() const
 {
     return this->isConsumed;
 }
 
-void MatchingBracket::Consume()
+void BracketPair::Consume()
 {
     this->isConsumed = true;
 }

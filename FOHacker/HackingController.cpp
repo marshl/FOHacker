@@ -145,10 +145,10 @@ void HackingController::OnClickEvent()
     }
     case GameState::PLAYING_GAME:
     {
-        LetterPosition letterPos;
-        if ( this->hackingView->CoordToLetterPosition( this->cursorCoord, letterPos ) )
+        ModelCoordinate letterPos;
+        if ( this->hackingView->ConvertViewSpaceToModelSpace( this->cursorCoord, letterPos ) )
         {
-            PuzzleWord const * puzzleWord = this->hackingModel->GetPuzzleWordAtLetterPosition( letterPos );
+            PuzzleWord const * puzzleWord = this->hackingModel->GetPuzzleWordAtCoord( letterPos );
 
             if ( puzzleWord != nullptr )
             {
@@ -158,11 +158,11 @@ void HackingController::OnClickEvent()
                 }
             }
 
-            MatchingBracket const * matchingBracket = this->hackingModel->GetMatchingBracketAtLetterPosition( letterPos );
+            BracketPair const * bracketPair = this->hackingModel->GetBracketPairAtCoord( letterPos );
 
-            if ( matchingBracket != nullptr )
+            if ( bracketPair != nullptr )
             {
-                this->hackingModel->AttemptMatchingBracket( matchingBracket );
+                this->hackingModel->AttemptBracketPair( bracketPair );
             }
         }
 

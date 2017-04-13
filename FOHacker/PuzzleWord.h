@@ -5,10 +5,8 @@
 #include <vector>
 #include "strfunc.h"
 
-struct LetterPosition
+struct ModelCoordinate
 {
-    int position;
-
     int column;
     int x;
     int y;
@@ -25,9 +23,9 @@ public:
 
     void SetPosition( int position, int columnCount, int columnHeight, int columnWidth );
 
-    const LetterPosition& GetLetterPosition( int index ) const;
+    const ModelCoordinate& GetLetterPosition( int index ) const;
 
-    LetterPosition& GetLetterPosition( int index );
+    ModelCoordinate& GetLetterPosition( int index );
 
     bool GetIsAttempted() const;
 
@@ -41,7 +39,7 @@ private:
     int position;
     int differenceFromSolution;
 
-    std::vector<LetterPosition> letterPositions;
+    std::vector<ModelCoordinate> letterPositions;
 };
 
 #endif

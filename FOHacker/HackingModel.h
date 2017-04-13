@@ -5,7 +5,7 @@
 #include <string>
 #include <Windows.h>
 #include "PuzzleWord.h"
-#include "MatchingBracket.h"
+#include "BracketPair.h"
 
 class DifficultyLevel;
 class PlayerAction;
@@ -26,9 +26,9 @@ public:
 
     PuzzleWord const * GetPuzzleWordAtPosition( int columnIndex, int rowIndex, int positionInRow ) const;
 
-    PuzzleWord const * GetPuzzleWordAtLetterPosition( const LetterPosition& letterPos ) const;
+    PuzzleWord const * GetPuzzleWordAtCoord( const ModelCoordinate& letterPos ) const;
 
-    MatchingBracket const * GetMatchingBracketAtLetterPosition( const LetterPosition& letterPos ) const;
+    BracketPair const * GetBracketPairAtCoord( const ModelCoordinate& letterPos ) const;
 
     DifficultyLevel * GetCurrentDifficulty() const;
 
@@ -47,11 +47,11 @@ public:
 
     const std::string& GetFillerText( int columnIndex, int rowIndex ) const;
 
-    int GetMatchingBracketCount() const;
-    MatchingBracket const * GetMatchingBracket( int matchingBracketIndex ) const;
+    int GetBracketPairCount() const;
+    BracketPair const * GetBracketPair( int matchingBracketIndex ) const;
 
     bool AttemptWord( PuzzleWord const * puzzleWord );
-    void AttemptMatchingBracket( MatchingBracket const * matchingBracket );
+    void AttemptBracketPair( BracketPair const * bracketPair );
 
     PlayerAction const * GetPlayerAction( int index ) const;
     int GetPlayerActionCount() const;
@@ -60,10 +60,10 @@ private:
     int attemptsRemaining;
 
     std::vector<PuzzleWord * > puzzleWords;
-    PuzzleWord* solutionWord;
+    PuzzleWord * solutionWord;
     std::vector<DifficultyLevel*> difficultyLevels;
     std::vector<std::vector<std::string>> fillerCharacters;
-    std::vector<MatchingBracket*> matchingBrackets;
+    std::vector<BracketPair*> bracketPairs;
     std::vector<PlayerAction*> playerActionList;
 
     DifficultyLevel * currentDifficulty;
@@ -74,9 +74,9 @@ private:
     void InitialiseDifficultyLevels();
     void RandomiseFillerLetters();
 
-    void SetupMatchingBrackets();
+    void SetupBracketPairs();
 
-    std::vector<MatchingBracket *> GetMatchingBracketsForLine( int columnIndex, int rowIndex );
+    std::vector<BracketPair *> GetBracketPairsOnLine( int columnIndex, int rowIndex );
 };
 
 #endif
