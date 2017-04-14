@@ -31,6 +31,8 @@ private:
     HANDLE outputHandle;
 
     void OnClickEvent();
+
+    bool isDone;
 };
 
 #endif

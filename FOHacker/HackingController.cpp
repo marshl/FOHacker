@@ -33,6 +33,8 @@ HackingController::HackingController( HackingModel* hackingModel, HackingView* h
     this->cursorCoord = {0, 0};
 
     this->currentState = GameState::DIFFICULTY_SELECTION;
+
+    this->isDone = false;
 }
 
 HackingController::~HackingController()
@@ -85,7 +87,7 @@ void HackingController::Run()
 
     DWORD lastMouseState = 0;
 
-    while ( !done )
+    while ( !this->isDone )
     {
         const int INPUT_BUFFER_SIZE = 255;
         INPUT_RECORD eventBuffer[INPUT_BUFFER_SIZE];
@@ -167,6 +169,10 @@ void HackingController::OnClickEvent()
         }
 
         break;
+    }
+    case GameState::GAME_COMPLETE:
+    {
+        this->isDone = true;
     }
     }
 }
