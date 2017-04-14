@@ -25,7 +25,6 @@ public:
     int GetScreenWidth() const;
 
     int GetLineCountAboveColumns() const;
-    const std::vector<std::string> GetIntroText() const;
 
     DifficultyLevel * GetDifficultyAtCoord( COORD coord ) const;
 

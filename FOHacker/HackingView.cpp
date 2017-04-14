@@ -82,16 +82,7 @@ int HackingView::GetHexCodeLength() const
 
 int HackingView::GetLineCountAboveColumns() const
 {
-    return 3 + this->GetIntroText().size();
-}
-
-const std::vector<std::string> HackingView::GetIntroText() const
-{
-    return
-        std::vector<std::string>{
-        "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL",
-            "!!!! WARNING: LOCKOUT IMMINENT !!!!",
-    };
+    return 5;
 }
 
 DifficultyLevel * HackingView::GetDifficultyAtCoord( COORD coord ) const
@@ -153,14 +144,24 @@ void HackingView::RenderDifficultyScreen( COORD cursorCoord )
 
 void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
 {
-    for ( int i = 0; i < ( int )this->GetIntroText().size(); ++i )
+    this->RenderText( {0,0}, "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL", false );
+    if ( this->hackingModel->GetAttemptsRemaining() == 1 )
     {
-        this->RenderText( {0, (short)i}, this->GetIntroText()[i], false );
+        this->RenderText( {0, 1}, "!!! WARNING: LOCKOUT IMMINENT !!!", false );
+    }
+    else
+    {
+        this->RenderText( {0,1}, "ENTER PASSWORD NOW", false );
     }
 
     std::ostringstream outstr;
     outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
-    this->RenderText( {0, ( short )this->GetIntroText().size() + 1}, outstr.str(), false );
+    this->RenderText( {0, 3}, outstr.str(), false );
+    for ( int i = 0; i < this->hackingModel->GetAttemptsRemaining(); ++i )
+    {
+        short xOffset = (short)( outstr.str().size() + 1 + i * 2 );
+        this->RenderText( {xOffset, 3}, " ", true );
+    }
 
     for ( int columnIndex = 0; columnIndex < this->hackingModel->GetColumnCount(); ++columnIndex )
     {
