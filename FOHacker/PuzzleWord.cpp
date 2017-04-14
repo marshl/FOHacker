@@ -4,7 +4,7 @@
 
 PuzzleWord::PuzzleWord( std::string text, std::string solution ) : text( text ), isAttempted( false ), position( -1 ), differenceFromSolution( 0 ), isRemoved( false )
 {
-    this->letterPositions.resize( text.length(), {0, 0} );
+    this->letterPositions.resize( text.size(), {0, 0} );
 
     this->differenceFromSolution = StringDiff( text, solution );
 }

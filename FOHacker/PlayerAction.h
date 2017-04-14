@@ -26,11 +26,7 @@ class FailedAttemptAction : public WordAttemptAction
 {
 public:
 
-    FailedAttemptAction( PuzzleWord  const *  puzzleWord, int attemptNumber, int totalAttemptCount ) : WordAttemptAction( puzzleWord )
-    {
-        this->attemptNumber = attemptNumber;
-        this->totalAttemptCount = totalAttemptCount;
-    }
+    FailedAttemptAction( PuzzleWord  const *  puzzleWord, int attemptNumber, int totalAttemptCount );
 
     int GetDisplayHeight() const;
     std::string GetDisplayText( int index ) const;
@@ -43,15 +39,40 @@ private:
 class SuccessfulAttemptAction : public WordAttemptAction
 {
 public:
-    SuccessfulAttemptAction( PuzzleWord const * puzzleWord ) : WordAttemptAction( puzzleWord )
-    {
-
-    }
+    SuccessfulAttemptAction( PuzzleWord const * puzzleWord );
 
     int GetDisplayHeight() const;
 
     std::string GetDisplayText( int index ) const;
 };
 
+class BracketAction : public PlayerAction
+{
+public:
+    BracketAction(std::string bracketText);
+
+protected:
+    std::string bracketText;
+};
+
+class DudBracketAction : public BracketAction
+{
+public:
+    DudBracketAction( std::string bracketText );
+
+    int GetDisplayHeight() const;
+
+    std::string GetDisplayText( int index )const;
+};
+
+class ReplenishBracketAction : public BracketAction
+{
+public:
+    ReplenishBracketAction( std::string bracketText );
+
+    int GetDisplayHeight() const;
+
+    std::string GetDisplayText( int index ) const;
+};
 
 #endif

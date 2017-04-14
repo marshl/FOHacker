@@ -99,7 +99,7 @@ BracketPair const * HackingModel::GetBracketPairAtCoord( const ModelCoordinate& 
     for ( int i = 0; i < ( int )this->bracketPairs.size(); ++i )
     {
         BracketPair const * bracket = this->bracketPairs[i];
-        if ( bracket->GetColumn() == letterPos.column && bracket->GetRow() == letterPos.y && bracket->GetStartingPosition() == letterPos.x )
+        if ( !bracket->IsConsumed() && bracket->GetColumn() == letterPos.column && bracket->GetRow() == letterPos.y && bracket->GetStartingPosition() == letterPos.x )
         {
             return bracket;
         }
@@ -222,27 +222,30 @@ void HackingModel::AttemptBracketPair( BracketPair const * bracketPair )
 
     float randVal = (float)rand() / (float)RAND_MAX;
 
-    if ( randVal < 0.25f )
+    std::string fillerText = this->GetFillerText( localBracket->GetColumn(), localBracket->GetRow() );
+    std::string bracketText = fillerText.substr( localBracket->GetStartingPosition(), localBracket->GetEndingPosition() - localBracket->GetStartingPosition() + 1 );
+
+    std::vector<PuzzleWord *> possibleDuds;
+    for ( int i = 0; i < ( int )this->puzzleWords.size(); ++i )
+    {
+        PuzzleWord * puzzleWord = this->puzzleWords[i];
+        if ( puzzleWord != this->solutionWord && !puzzleWord->IsRemoved() )
+        {
+            possibleDuds.push_back( puzzleWord );
+        }
+    }
+
+    if ( possibleDuds.size() == 0 || randVal < 0.25f )
     {
         this->attemptsRemaining = this->GetCurrentDifficulty()->GetStartingAttemptCount();
+        this->playerActionList.push_back( new ReplenishBracketAction( bracketText ) );
     }
     else
     {
-        std::vector<PuzzleWord *> possibleDuds;
-        for ( int i = 0; i < this->puzzleWords.size(); ++i )
-        {
-            PuzzleWord * puzzleWord = this->puzzleWords[i];
-            if ( puzzleWord != this->solutionWord && !puzzleWord->IsRemoved() )
-            {
-                possibleDuds.push_back( puzzleWord );
-            }
-        }
+        std::random_shuffle( possibleDuds.begin(), possibleDuds.end() );
+        possibleDuds.front()->Remove();
 
-        if ( possibleDuds.size() > 0 )
-        {
-            std::random_shuffle( possibleDuds.begin(), possibleDuds.end() );
-            possibleDuds.front()->Remove();
-        }
+        this->playerActionList.push_back( new DudBracketAction( bracketText ) );
     }
 
     localBracket->Consume();

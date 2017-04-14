@@ -192,11 +192,11 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
     for ( int i = this->hackingModel->GetPlayerActionCount() - 1; i >= 0; --i )
     {
         PlayerAction const * playerAction = this->hackingModel->GetPlayerAction( i );
-        COORD coord = {this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1, this->GetScreenHeight() - 2 - attemptedWordOffset};
+        COORD coord = {(short)( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1 ),(short)( this->GetScreenHeight() - 2 - attemptedWordOffset )};
 
         for ( int j = 0; j < playerAction->GetDisplayHeight(); ++j )
         {
-            this->RenderText( coord, "> " + playerAction->GetDisplayText( j ), false );
+            this->RenderText( coord, ">" + playerAction->GetDisplayText( j ), false );
             --coord.Y;
             ++attemptedWordOffset;
             if ( attemptedWordOffset > this->hackingModel->GetColumnHeight() - 2 )
@@ -212,13 +212,13 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
         ModelCoordinate letterPos;
         if ( this->ConvertViewSpaceToModelSpace( cursorCoord, letterPos ) )
         {
-            const BracketPair * bracket = this->hackingModel->GetBracketPairAtCoord( letterPos );
+            const BracketPair * selectedBracket = this->hackingModel->GetBracketPairAtCoord( letterPos );
 
-            if ( bracket != nullptr && !bracket->IsConsumed())
+            if ( selectedBracket != nullptr && !selectedBracket->IsConsumed() )
             {
-                for ( int position = bracket->GetStartingPosition(); position <= bracket->GetEndingPosition(); ++position )
+                for ( int position = selectedBracket->GetStartingPosition(); position <= selectedBracket->GetEndingPosition(); ++position )
                 {
-                    COORD coord = this->ColumnPositionToCoord( bracket->GetColumn(), bracket->GetRow(), position );
+                    COORD coord = this->ColumnPositionToCoord( selectedBracket->GetColumn(), selectedBracket->GetRow(), position );
                     this->highlightBuffer[coord.Y][coord.X] = true;
                 }
             }
@@ -232,21 +232,36 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
                     COORD& pos = this->LetterPositionToCoord( selectedPuzzleWord->GetLetterPosition( j ) );
                     this->highlightBuffer[pos.Y][pos.X] = true;
                 }
-
-                std::ostringstream outstr;
-                outstr << "> " << selectedPuzzleWord->GetText();
-
-                this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1,
-                    outstr.str().length(),
-                    outstr.str() );
             }
-           
+
+            std::ostringstream outstr;
+
+            outstr << ">";
+            if ( selectedPuzzleWord != nullptr )
+            {
+                outstr << selectedPuzzleWord->GetText();
+            }
+            else if ( selectedBracket != nullptr )
+            {
+                const std::string& filler = this->hackingModel->GetFillerText( selectedBracket->GetColumn(), selectedBracket->GetRow() );
+                outstr << filler.substr( selectedBracket->GetStartingPosition(), selectedBracket->GetEndingPosition() - selectedBracket->GetStartingPosition() + 1 );
+            }
+            else
+            {
+                const std::string& filler = this->hackingModel->GetFillerText( letterPos.column, letterPos.y );
+                outstr << filler[letterPos.x];
+            }
+
+            this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1,
+                outstr.str().length(),
+                outstr.str() );
+
             this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
         }
         else
         {
             std::ostringstream outstr;
-            outstr << "> ";
+            outstr << ">";
 
             this->characterBuffer[this->GetScreenHeight() - 1].replace( this->GetTotalColumnWidth()* this->hackingModel->GetColumnCount() + 1,
                 outstr.str().length(),

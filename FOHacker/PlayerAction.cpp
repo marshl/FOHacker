@@ -11,6 +11,13 @@ WordAttemptAction::WordAttemptAction( PuzzleWord const * puzzleWord )
     this->puzzleWord = puzzleWord;
 }
 
+FailedAttemptAction::FailedAttemptAction( PuzzleWord  const *  puzzleWord, int attemptNumber, int totalAttemptCount ) : WordAttemptAction( puzzleWord )
+{
+    this->attemptNumber = attemptNumber;
+    this->totalAttemptCount = totalAttemptCount;
+}
+
+
 int FailedAttemptAction::GetDisplayHeight() const
 {
     return 3;
@@ -38,9 +45,14 @@ std::string FailedAttemptAction::GetDisplayText( int index ) const
     }
 }
 
+SuccessfulAttemptAction::SuccessfulAttemptAction( PuzzleWord const * puzzleWord ) : WordAttemptAction( puzzleWord )
+{
+
+}
+
 int SuccessfulAttemptAction::GetDisplayHeight() const
 {
-    return 2;
+    return 5;
 }
 
 std::string SuccessfulAttemptAction::GetDisplayText( int index ) const
@@ -50,9 +62,66 @@ std::string SuccessfulAttemptAction::GetDisplayText( int index ) const
     switch ( index )
     {
     case 0:
-        return "Entry granted";
+        return "is accessed.";
     case 1:
+        return "while system";
+    case 2:
+        return "Please wait";
+    case 3:
+        return "Exact match!";
+    case 4:
         return this->puzzleWord->GetText();
+    default:
+        return "";
+    }
+}
+
+BracketAction::BracketAction( std::string bracketText )
+{
+    this->bracketText = bracketText;
+}
+
+DudBracketAction::DudBracketAction( std::string bracketText ) : BracketAction(bracketText)
+{
+}
+
+int DudBracketAction::GetDisplayHeight() const
+{
+    return 2;
+}
+
+std::string DudBracketAction::GetDisplayText( int index ) const
+{
+    switch ( index )
+    {
+    case 0:
+        return "Dud removed.";
+    case 1:
+        return this->bracketText;
+    default:
+        return "";
+    }
+}
+
+ReplenishBracketAction::ReplenishBracketAction( std::string bracketText ) : BracketAction(bracketText)
+{
+}
+
+int ReplenishBracketAction::GetDisplayHeight() const
+{
+    return 3;
+}
+
+std::string ReplenishBracketAction::GetDisplayText( int index ) const
+{
+    switch ( index )
+    {
+    case 0:
+        return "replenished.";
+    case 1:
+        return "Allowance";
+    case 2:
+        return this->bracketText;
     default:
         return "";
     }
