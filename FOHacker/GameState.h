@@ -3,6 +3,9 @@
 
 enum GameState
 {
+    NONE,
+
+    PRE_GAME,
     DIFFICULTY_SELECTION,
     PLAYING_GAME,
     GAME_COMPLETE,

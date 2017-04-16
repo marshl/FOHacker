@@ -33,7 +33,7 @@ HackingController::HackingController( HackingModel* hackingModel, HackingView* h
 
     this->cursorCoord = {0, 0};
 
-    this->currentState = GameState::DIFFICULTY_SELECTION;
+    this->currentState = GameState::NONE;
 
     this->isDone = false;
 }
@@ -91,6 +91,8 @@ void HackingController::Run()
 
     LARGE_INTEGER previousTime;
     QueryPerformanceCounter( &previousTime );
+
+    this->ChangeState( GameState::PRE_GAME );
 
     while ( !this->isDone )
     {
@@ -151,6 +153,10 @@ void HackingController::OnClickEvent()
 {
     switch ( this->currentState )
     {
+    case GameState::PRE_GAME:
+    {
+        break;
+    }
     case GameState::DIFFICULTY_SELECTION:
     {
         DifficultyLevel * cursorDifficulty = this->hackingView->GetDifficultyAtCoord( this->cursorCoord );
@@ -192,4 +198,11 @@ void HackingController::OnClickEvent()
         this->isDone = true;
     }
     }
+}
+
+void HackingController::ChangeState( GameState newState )
+{
+    this->hackingView->OnStateChange( this->currentState, newState );
+    
+    this->currentState = newState;
 }

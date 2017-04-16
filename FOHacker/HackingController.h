@@ -32,6 +32,8 @@ private:
 
     void OnClickEvent();
 
+    void ChangeState( GameState newState );
+
     bool isDone;
 };
 
