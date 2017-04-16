@@ -17,7 +17,7 @@ public:
     HackingView( const HackingModel * const hackingModel );
     ~HackingView();
 
-    void Render( GameState state, COORD cursorCoord );
+    void Render( GameState state, float deltaTime, COORD cursorCoord );
 
     void SetOutputHandle( HANDLE handle );
 

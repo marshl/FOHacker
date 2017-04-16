@@ -10,6 +10,7 @@
 #include <cmath>
 #include <sstream>
 #include <list>
+#include <ctime>
 #include <boost/algorithm/clamp.hpp>
 
 #include "strfunc.h"
@@ -86,6 +87,10 @@ void HackingController::Run()
     SetWindowLong( hwnd, GWL_STYLE, dwStyle );
 
     DWORD lastMouseState = 0;
+    DWORD eventCount;
+
+    LARGE_INTEGER previousTime;
+    QueryPerformanceCounter( &previousTime );
 
     while ( !this->isDone )
     {
@@ -93,28 +98,30 @@ void HackingController::Run()
         INPUT_RECORD eventBuffer[INPUT_BUFFER_SIZE];
         DWORD eventsRead;
 
-        if ( ReadConsoleInput( inputHandle, eventBuffer, INPUT_BUFFER_SIZE, &eventsRead ) )
+        if ( GetNumberOfConsoleInputEvents( this->inputHandle, &eventCount ) &&
+            eventCount > 0 &&
+            ReadConsoleInput( this->inputHandle, eventBuffer, INPUT_BUFFER_SIZE, &eventsRead ) )
         {
             for ( unsigned int eventIndex = 0; eventIndex < eventsRead; ++eventIndex )
             {
-                INPUT_RECORD* record = &eventBuffer[eventIndex];
-                if ( record->EventType == MOUSE_EVENT )
+                INPUT_RECORD& inputRecord = eventBuffer[eventIndex];
+                if ( inputRecord.EventType == MOUSE_EVENT )
                 {
-                    cursorCoord = record->Event.MouseEvent.dwMousePosition;
+                    cursorCoord = inputRecord.Event.MouseEvent.dwMousePosition;
                     cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() - 1 );
                     cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() - 1 );
 
-                    if ( lastMouseState & FROM_LEFT_1ST_BUTTON_PRESSED && !record->Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED )
+                    if ( lastMouseState & FROM_LEFT_1ST_BUTTON_PRESSED && !inputRecord.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED )
                     {
                         this->OnClickEvent();
                     }
 
-                    lastMouseState = record->Event.MouseEvent.dwButtonState;
+                    lastMouseState = inputRecord.Event.MouseEvent.dwButtonState;
                 }
 
-                if ( record->EventType == KEY_EVENT )
+                if ( inputRecord.EventType == KEY_EVENT )
                 {
-                    WORD keyEvent = record->Event.KeyEvent.wVirtualKeyCode;
+                    WORD keyEvent = inputRecord.Event.KeyEvent.wVirtualKeyCode;
 
                     if ( keyEvent == VK_ESCAPE )
                     {
@@ -124,7 +131,17 @@ void HackingController::Run()
             }
         }
 
-        this->hackingView->Render( this->currentState, this->cursorCoord );
+        LARGE_INTEGER frequency;
+        LARGE_INTEGER currentTime;
+
+        QueryPerformanceFrequency( &frequency );
+        QueryPerformanceCounter( &currentTime );
+
+        float deltaTime = (float)( currentTime.QuadPart - previousTime.QuadPart ) / (float)frequency.QuadPart;
+        previousTime = currentTime;
+
+        this->hackingView->Render( this->currentState, deltaTime, this->cursorCoord );
+
         Sleep( 1000 / 24 );
     }
 }

@@ -30,7 +30,7 @@ HackingView::~HackingView()
 {
 }
 
-void HackingView::Render( GameState state, COORD cursorCoord )
+void HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
 {
     this->ClearBuffer();
     this->RefreshBuffer( state, cursorCoord );
