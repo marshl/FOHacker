@@ -14,16 +14,13 @@ HackingView::HackingView( const HackingModel * const hackingModel ) : hackingMod
     assert( hackingModel != nullptr );
 
     this->cursorBlinkTimer = 0.0f;
+    this->timeSinceDelayedRenderStart = 0.0f;
     this->isCursorFilled = false;
     this->lastTypingCoord = {-1,-1};
 
     this->displayBuffer.resize( this->GetScreenHeight() * this->GetScreenWidth() );
 
-    this->characterBuffer.resize( this->GetScreenHeight(), std::string( this->GetScreenWidth(), ' ' ) );
-    this->highlightBuffer.resize( this->GetScreenHeight(), std::vector<bool>( this->GetScreenWidth(), false ) );
-    this->delayBuffer.resize( this->GetScreenHeight(), std::vector<float>( this->GetScreenWidth(), 0.0f ) );
-
-    this->stringBuffer.resize( this->hackingModel->GetTotalColumnCharacterCount(), '#' );
+    this->ClearBuffer();
 
     SetConsoleScreenBufferSize( this->outputHandle, {( short )this->GetScreenWidth(), ( short )this->GetScreenHeight()} );
 
@@ -39,76 +36,42 @@ void HackingView::OnStateChange( GameState oldState, GameState newState )
 {
     if ( oldState == GameState::NONE &&  newState == GameState::PRE_GAME )
     {
-        float delay = 0.0f;
-
-        delay = this->RenderDelayedTextFast( {0,0}, "WELCOME TO ROBCO INDUSTRIES (TM) TERMALINK", delay );
-
-        delay = this->RenderDelayedText( {0,2}, ">", delay, delay );
-        delay += 1.0f;
-        delay = this->RenderDelayedTextSlow( {1,2}, "SET TERNIMAL/INQUIRE", delay );
-        delay += 0.5f;
-        delay = this->RenderDelayedTextFast( {0,4}, "RIT-V300", delay );
-
-        delay = this->RenderDelayedText( {0,6}, ">", delay, delay );
-        delay += 1.0f;
-        delay = this->RenderDelayedTextSlow( {1,6}, "SET FILE/PROTECTION-OWNER:RWED ACCOUNTS.F", delay );
-        delay += 0.5f;
-
-        delay = this->RenderDelayedText( {0,7}, ">", delay, delay );
-        delay += 1.0f;
-        delay = this->RenderDelayedTextSlow( {1,7}, "SET HALT RESTART/MAINT", delay );
-        delay += 0.5f;
-        delay = this->RenderDelayedTextFast( {0,9}, "Initializing Robco Industries(TM) MF Boot Agent v.2.3.0", delay );
-        delay = this->RenderDelayedTextFast( {0,10}, "RETROS BIOS", delay );
-        delay = this->RenderDelayedTextFast( {0,11}, "RBIOS-4.-2.08.00 52EE5.E7.E8", delay );
-        delay = this->RenderDelayedTextFast( {0,12}, "Copyright 2201-2203 Robco Ind.", delay );
-        delay = this->RenderDelayedTextFast( {0,13}, "Uppermem: 64 KB", delay );
-        delay = this->RenderDelayedTextFast( {0,14}, "Root (5A8)", delay );
-        delay = this->RenderDelayedTextFast( {0,15}, "Maintenance Mode", delay );
-
-        delay = this->RenderDelayedText( {0,17}, ">", delay, delay );
-        delay += 1.0f;
-        delay = this->RenderDelayedTextSlow( {1,17}, "RUN DEBUG/ACCOUNTS.F", delay );
+        this->timeSinceDelayedRenderStart = 0.0f;
+    }
+    else if ( oldState == GameState::PRE_GAME && newState == GameState::DIFFICULTY_SELECTION )
+    {
+        this->timeSinceDelayedRenderStart = 0.0f;
+        this->lastTypingCoord = {-1,-1};
     }
 }
 
 void HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
 {
+    this->ClearBuffer();
     this->cursorBlinkTimer += deltaTime;
+    this->timeSinceDelayedRenderStart += deltaTime;
     if ( cursorBlinkTimer > 0.4f )
     {
         this->cursorBlinkTimer = 0.0f;
         this->isCursorFilled = !this->isCursorFilled;
     }
 
-    //this->ClearBuffer();
     this->RefreshBuffer( state, cursorCoord );
-
-    const WORD NORMAL_CHAR_ATTRIBUTES = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-    const WORD HIGHLIGHTED_CHAR_ATTRIBUTES = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 
     for ( int y = 0; y < this->GetScreenHeight(); ++y )
     {
         for ( int x = 0; x < this->GetScreenWidth(); ++x )
         {
-            if ( this->delayBuffer[y][x] > 0 && this->delayBuffer[y][x] - deltaTime < 0.0f )
+            const int index = y * this->GetScreenWidth() + x;
+
+            if ( this->delayBuffer[y][x] > this->timeSinceDelayedRenderStart && this->delayBuffer[y][x] - deltaTime < this->timeSinceDelayedRenderStart )
             {
-                this->lastTypingCoord = {(short)x, (short)y};
+                this->lastTypingCoord = {(short)x + 1, (short)y};
             }
 
-            this->delayBuffer[y][x] = max( 0.0f, this->delayBuffer[y][x] - deltaTime );
-
-            const int index = y * this->GetScreenWidth() + x;
-            displayBuffer[index].Char.AsciiChar = this->delayBuffer[y][x] <= 0.0f ? this->characterBuffer[y][x] : ' ';
+            displayBuffer[index].Char.AsciiChar = this->delayBuffer[y][x] <= this->timeSinceDelayedRenderStart ? this->characterBuffer[y][x] : ' ';
             displayBuffer[index].Attributes = this->highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
         }
-    }
-
-    if ( this->lastTypingCoord.X != -1 && this->lastTypingCoord.Y != -1 )
-    {
-        const int index = this->lastTypingCoord.Y * this->GetScreenWidth() + this->lastTypingCoord.X;
-        displayBuffer[index + 1].Char.AsciiChar = ' ';
-        displayBuffer[index + 1].Attributes = this->isCursorFilled ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
     }
 
     const COORD ORIGIN_COORD = {0,0};
@@ -168,8 +131,12 @@ void HackingView::ClearBuffer()
 {
     this->characterBuffer.clear();
     this->characterBuffer.resize( this->GetScreenHeight(), std::string( this->GetScreenWidth(), ' ' ) );
+
     this->highlightBuffer.clear();
     this->highlightBuffer.resize( this->GetScreenHeight(), std::vector<bool>( this->GetScreenWidth(), false ) );
+
+    this->delayBuffer.clear();
+    this->delayBuffer.resize( this->GetScreenHeight(), std::vector<float>( this->GetScreenWidth(), 0.0f ) );
 }
 
 void HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
@@ -197,19 +164,41 @@ void HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
 
 void HackingView::RenderPreGame( COORD cursorCoord )
 {
-    /*this->RenderText( {0,0}, "WELCOME TO ROBCO INDUSTRIES (TM) TERMALINK", false );
-    this->RenderText( {0,2}, ">SET TERNIMAL/INQUIRE", false );
-    this->RenderText( {0,4}, "RIT-V300", false );
-    this->RenderText( {0,6}, ">SET FILE/PROTECTION-OWNER:REWD ACCOUNTS.F", false );
-    this->RenderText( {0,7}, ">SET HALT RESTART/MAINT", false );
-    this->RenderText( {0,9}, "Initializing Robco Industries(TM) MF Boot Agent v.2.3.0", false );
-    this->RenderText( {0,10}, "RETROS BIOS", false );
-    this->RenderText( {0,11}, "RBIOS-4.-2.08.00 52EE5.E7.E8", false );
-    this->RenderText( {0,12}, "Copyright 2201-2203 Robco Ind.", false );
-    this->RenderText( {0,13}, "Uppermem: 64 KB", false );
-    this->RenderText( {0,14}, "Root (5A8)", false );
-    this->RenderText( {0,15}, "Maintenance Mode", false );
-    this->RenderText( {0,17}, ">RUN DEBUG/ACCOUNTS.F", false );*/
+    float delay = 0.0f;
+
+    delay = this->RenderDelayedTextFast( {0,0}, "WELCOME TO ROBCO INDUSTRIES (TM) TERMALINK", delay );
+
+    delay = this->RenderDelayedText( {0,2}, ">", delay, delay );
+    delay += 1.0f;
+    delay = this->RenderDelayedTextSlow( {1,2}, "SET TERMINAL/INQUIRE", delay );
+    delay += 0.5f;
+    delay = this->RenderDelayedTextFast( {0,4}, "RIT-V300", delay );
+
+    delay = this->RenderDelayedText( {0,6}, ">", delay, delay );
+    delay += 1.0f;
+    delay = this->RenderDelayedTextSlow( {1,6}, "SET FILE/PROTECTION-OWNER:RWED ACCOUNTS.F", delay );
+    delay += 0.5f;
+
+    delay = this->RenderDelayedText( {0,7}, ">", delay, delay );
+    delay += 1.0f;
+    delay = this->RenderDelayedTextSlow( {1,7}, "SET HALT RESTART/MAINT", delay );
+    delay += 0.5f;
+    delay = this->RenderDelayedTextFast( {0,9}, "Initializing Robco Industries(TM) MF Boot Agent v.2.3.0", delay );
+    delay = this->RenderDelayedTextFast( {0,10}, "RETROS BIOS", delay );
+    delay = this->RenderDelayedTextFast( {0,11}, "RBIOS-4.-2.08.00 52EE5.E7.E8", delay );
+    delay = this->RenderDelayedTextFast( {0,12}, "Copyright 2201-2203 Robco Ind.", delay );
+    delay = this->RenderDelayedTextFast( {0,13}, "Uppermem: 64 KB", delay );
+    delay = this->RenderDelayedTextFast( {0,14}, "Root (5A8)", delay );
+    delay = this->RenderDelayedTextFast( {0,15}, "Maintenance Mode", delay );
+
+    delay = this->RenderDelayedText( {0,17}, ">", delay, delay );
+    delay += 1.0f;
+    delay = this->RenderDelayedTextSlow( {1,17}, "RUN DEBUG/ACCOUNTS.F", delay );
+
+    if ( this->lastTypingCoord.X != -1 && this->lastTypingCoord.Y != -1 )
+    {
+        this->RenderText( this->lastTypingCoord, " ", this->isCursorFilled );
+    }
 }
 
 void HackingView::RenderDifficultyScreen( COORD cursorCoord )

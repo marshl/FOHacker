@@ -40,11 +40,11 @@ private:
     std::vector<std::string> characterBuffer;
     std::vector<std::vector<bool> > highlightBuffer;
     std::vector<std::vector<float>> delayBuffer;
-    std::string stringBuffer;
     std::vector<std::string> hexAddresses;
     float cursorBlinkTimer;
     bool isCursorFilled;
     COORD lastTypingCoord;
+    float timeSinceDelayedRenderStart;
     
 
     int GetTotalColumnWidth() const;
@@ -72,6 +72,9 @@ private:
     COORD ColumnPositionToCoord( int columnIndex, int rowIndex, int position ) const;
     COORD LetterPositionToCoord( ModelCoordinate letterPos ) const;
     void RenderLetterPositionOfCoord( COORD coord );
+
+    const WORD NORMAL_CHAR_ATTRIBUTES = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    const WORD HIGHLIGHTED_CHAR_ATTRIBUTES = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 };
 
 #endif
