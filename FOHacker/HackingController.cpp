@@ -46,53 +46,14 @@ HackingController::~HackingController()
 
 void HackingController::Run()
 {
-    bool done = false;
-
-    SetConsoleActiveScreenBuffer( this->inputHandle );
-    DWORD flags;
-    GetConsoleMode( this->inputHandle, &flags );
-
-    DWORD fdwMode = flags & ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT );
-    if ( !SetConsoleMode( inputHandle, fdwMode ) )
-    {
-        done = true;
-    }
-
-    SetConsoleTitle( "Hacking" );
-
-    // Remove blinking cursor
-    CONSOLE_CURSOR_INFO cursorInfo;
-    cursorInfo.bVisible = FALSE;
-    cursorInfo.dwSize = 100; // Yes, the size needs to be set
-    SetConsoleCursorInfo( this->outputHandle, &cursorInfo );
-
-    // Resize window to fix View size
-    SMALL_RECT tmp = {0, 0, ( short )this->hackingView->GetScreenWidth(), ( short )this->hackingView->GetScreenHeight()};
-    SetConsoleWindowInfo( this->outputHandle, TRUE, &tmp );
-
-    // Remove scrollbars
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo( this->outputHandle, &csbi );
-    COORD scrollbar = {
-        csbi.srWindow.Right - csbi.srWindow.Left + 1,
-        csbi.srWindow.Bottom - csbi.srWindow.Top + 1
-    };
-    SetConsoleScreenBufferSize( this->outputHandle, scrollbar );
-
-    // Remove minimuze/maximise buttons, and prevent resizing
-    HWND hwnd = GetConsoleWindow();
-    long dwStyle;
-    dwStyle = GetWindowLong( hwnd, GWL_STYLE );
-    dwStyle ^= WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
-    SetWindowLong( hwnd, GWL_STYLE, dwStyle );
+    this->SetupWindow();
+    this->ChangeState( GameState::PRE_GAME );
 
     DWORD lastMouseState = 0;
     DWORD eventCount;
 
     LARGE_INTEGER previousTime;
     QueryPerformanceCounter( &previousTime );
-
-    this->ChangeState( GameState::PRE_GAME );
 
     while ( !this->isDone )
     {
@@ -127,7 +88,7 @@ void HackingController::Run()
 
                     if ( keyEvent == VK_ESCAPE )
                     {
-                        done = true;
+                        this->isDone = true;
                     }
                 }
             }
@@ -149,12 +110,66 @@ void HackingController::Run()
 }
 
 
+void HackingController::SetupWindow()
+{
+    SetConsoleActiveScreenBuffer( this->inputHandle );
+    DWORD flags;
+    GetConsoleMode( this->inputHandle, &flags );
+
+    DWORD fdwMode = flags & ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT );
+    if ( !SetConsoleMode( inputHandle, fdwMode ) )
+    {
+        this->isDone = true;
+    }
+
+    SetConsoleTitle( "Hacking" );
+
+    // Remove blinking cursor
+    CONSOLE_CURSOR_INFO cursorInfo;
+    cursorInfo.bVisible = FALSE;
+    cursorInfo.dwSize = 100; // Yes, the size needs to be set
+    SetConsoleCursorInfo( this->outputHandle, &cursorInfo );
+
+    // Resize window to fix View size
+    SMALL_RECT tmp = {0, 0, ( short )this->hackingView->GetScreenWidth(), ( short )this->hackingView->GetScreenHeight()};
+    SetConsoleWindowInfo( this->outputHandle, TRUE, &tmp );
+
+    // Remove scrollbars
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo( this->outputHandle, &csbi );
+    COORD scrollbar = {
+        csbi.srWindow.Right - csbi.srWindow.Left + 1,
+        csbi.srWindow.Bottom - csbi.srWindow.Top + 1
+    };
+    SetConsoleScreenBufferSize( this->outputHandle, scrollbar );
+
+    // Remove minimuze/maximise buttons, and prevent resizing
+    HWND hwnd = GetConsoleWindow();
+    long dwStyle;
+    dwStyle = GetWindowLong( hwnd, GWL_STYLE );
+    dwStyle ^= WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
+    SetWindowLong( hwnd, GWL_STYLE, dwStyle );
+
+    // Set font to be larger and more distinct
+    HANDLE outputHandle = GetStdHandle( STD_OUTPUT_HANDLE );
+    CONSOLE_FONT_INFOEX consoleFontInfo;
+    consoleFontInfo.cbSize = sizeof( consoleFontInfo );
+    consoleFontInfo.nFont = 0;
+    consoleFontInfo.dwFontSize.X = 0;
+    consoleFontInfo.dwFontSize.Y = 18;
+    consoleFontInfo.FontFamily = FF_DONTCARE;
+    consoleFontInfo.FontWeight = FW_BOLD;
+    wcscpy_s( consoleFontInfo.FaceName, L"Consolas" );
+    SetCurrentConsoleFontEx( outputHandle, FALSE, &consoleFontInfo );
+}
+
 void HackingController::OnClickEvent()
 {
     switch ( this->currentState )
     {
     case GameState::PRE_GAME:
     {
+        this->ChangeState( GameState::DIFFICULTY_SELECTION );
         break;
     }
     case GameState::DIFFICULTY_SELECTION:
@@ -203,6 +218,6 @@ void HackingController::OnClickEvent()
 void HackingController::ChangeState( GameState newState )
 {
     this->hackingView->OnStateChange( this->currentState, newState );
-    
+
     this->currentState = newState;
 }

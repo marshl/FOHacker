@@ -30,6 +30,7 @@ private:
     HANDLE inputHandle;
     HANDLE outputHandle;
 
+    void SetupWindow();
     void OnClickEvent();
 
     void ChangeState( GameState newState );
