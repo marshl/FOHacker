@@ -103,7 +103,16 @@ void HackingController::Run()
         float deltaTime = (float)( currentTime.QuadPart - previousTime.QuadPart ) / (float)frequency.QuadPart;
         previousTime = currentTime;
 
-        this->hackingView->Render( this->currentState, deltaTime, this->cursorCoord );
+        bool renderResult = this->hackingView->Render( this->currentState, deltaTime, this->cursorCoord );
+        if ( renderResult )
+        {
+            switch ( this->currentState )
+            {
+            case GameState::DIFFICULTY_SELECTION_PRE_RENDER:
+                this->ChangeState( GameState::DIFFICULTY_SELECTION );
+            }
+        }
+
 
         Sleep( 1000 / 24 );
     }
@@ -169,7 +178,7 @@ void HackingController::OnClickEvent()
     {
     case GameState::PRE_GAME:
     {
-        this->ChangeState( GameState::DIFFICULTY_SELECTION );
+        this->ChangeState( GameState::DIFFICULTY_SELECTION_PRE_RENDER );
         break;
     }
     case GameState::DIFFICULTY_SELECTION:

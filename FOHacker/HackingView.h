@@ -18,7 +18,7 @@ public:
     ~HackingView();
 
     void OnStateChange( GameState oldState, GameState newState );
-    void Render( GameState state, float deltaTime, COORD cursorCoord );
+    bool Render( GameState state, float deltaTime, COORD cursorCoord );
 
     void SetOutputHandle( HANDLE handle );
 
@@ -52,11 +52,11 @@ private:
 
     void ClearBuffer();
 
-    void RefreshBuffer( GameState state, COORD cursorCoord );
+    bool RefreshBuffer( GameState state, COORD cursorCoord );
 
-    void RenderPreGame( COORD cursorCoord );
-    void RenderDifficultyScreen( COORD cursorCoord );
-    void RenderGameScreen( GameState state, COORD cursorCoord );
+    bool RenderPreGame( COORD cursorCoord );
+    bool RenderDifficultyScreen( COORD cursorCoord, bool preRendering );
+    bool RenderGameScreen( GameState state, COORD cursorCoord );
 
     void RenderText( COORD position, std::string text, bool isHighlighted );
     float RenderDelayedText( COORD position, std::string text, float startDelay, float endDelay );

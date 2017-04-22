@@ -394,7 +394,7 @@ void HackingModel::InitialiseDifficultyLevels()
 
 void HackingModel::RandomiseFillerLetters()
 {
-    const std::string FILLER_CHARACTERS = "$-/?|=+&^%!@#&*{}[]()<>,.'\"";
+    const std::string FILLER_CHARACTERS = "$-/\\?|=+&^%!@#&*{}[]()<>,.'\"";
     const int FILLER_CHARACTER_COUNT = FILLER_CHARACTERS.length();
 
     this->fillerCharacters.resize( this->GetColumnCount() );

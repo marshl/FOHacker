@@ -38,14 +38,14 @@ void HackingView::OnStateChange( GameState oldState, GameState newState )
     {
         this->timeSinceDelayedRenderStart = 0.0f;
     }
-    else if ( oldState == GameState::PRE_GAME && newState == GameState::DIFFICULTY_SELECTION )
+    else if ( oldState == GameState::PRE_GAME && newState == GameState::DIFFICULTY_SELECTION_PRE_RENDER )
     {
         this->timeSinceDelayedRenderStart = 0.0f;
         this->lastTypingCoord = {-1,-1};
     }
 }
 
-void HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
+bool HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
 {
     this->ClearBuffer();
     this->cursorBlinkTimer += deltaTime;
@@ -56,7 +56,7 @@ void HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
         this->isCursorFilled = !this->isCursorFilled;
     }
 
-    this->RefreshBuffer( state, cursorCoord );
+    bool result = this->RefreshBuffer( state, cursorCoord );
 
     for ( int y = 0; y < this->GetScreenHeight(); ++y )
     {
@@ -78,6 +78,8 @@ void HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
     SMALL_RECT AREA_RECT = {ORIGIN_COORD.X, ORIGIN_COORD.Y, ( short )this->GetScreenWidth(), ( short )this->GetScreenHeight()};
     const COORD screenSize = {( short )this->GetScreenWidth(), ( short )this->GetScreenHeight()};
     WriteConsoleOutput( outputHandle, this->displayBuffer.data(), screenSize, ORIGIN_COORD, &AREA_RECT );
+
+    return result;
 }
 
 void HackingView::SetOutputHandle( HANDLE handle )
@@ -117,7 +119,7 @@ DifficultyLevel * HackingView::GetDifficultyAtCoord( COORD coord ) const
     {
         DifficultyLevel * difficulty = this->hackingModel->GetDifficultyLevelWithIndex( i );
 
-        COORD textPosition = {(short)( this->GetScreenWidth() - difficulty->GetName().size() ) / 2, (short)i * 2 + 5};
+        COORD textPosition = {(short)1, (short)i * 2 + 3};
         if ( this->IsCoordInString( coord, textPosition, difficulty->GetName().size() ) )
         {
             return difficulty;
@@ -139,30 +141,33 @@ void HackingView::ClearBuffer()
     this->delayBuffer.resize( this->GetScreenHeight(), std::vector<float>( this->GetScreenWidth(), 0.0f ) );
 }
 
-void HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
+bool HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
 {
     switch ( state )
     {
     case GameState::PRE_GAME:
     {
-        this->RenderPreGame( cursorCoord );
-        break;
+        return this->RenderPreGame( cursorCoord );
+    }
+    case GameState::DIFFICULTY_SELECTION_PRE_RENDER:
+    {
+        return this->RenderDifficultyScreen( cursorCoord, true );
     }
     case GameState::DIFFICULTY_SELECTION:
     {
-        this->RenderDifficultyScreen( cursorCoord );
-        break;
+        return this->RenderDifficultyScreen( cursorCoord, false );
     }
     case GameState::PLAYING_GAME:
     case GameState::GAME_COMPLETE:
     {
-        this->RenderGameScreen( state, cursorCoord );
-        break;
+        return this->RenderGameScreen( state, cursorCoord );
     }
+    default:
+        return false;
     }
 }
 
-void HackingView::RenderPreGame( COORD cursorCoord )
+bool HackingView::RenderPreGame( COORD cursorCoord )
 {
     float delay = 0.0f;
 
@@ -199,24 +204,48 @@ void HackingView::RenderPreGame( COORD cursorCoord )
     {
         this->RenderText( this->lastTypingCoord, " ", this->isCursorFilled );
     }
+
+    return this->timeSinceDelayedRenderStart >= delay;
 }
 
-void HackingView::RenderDifficultyScreen( COORD cursorCoord )
+bool HackingView::RenderDifficultyScreen( COORD cursorCoord, bool preRendering )
 {
+    float delay = 0.0f;
+
+    if ( preRendering )
+    {
+        delay = this->RenderDelayedTextFast( {0,0}, "SELECT THE PASSWORD STRENGTH:", delay );
+    }
+    else
+    {
+        this->RenderText( {0,0}, "SELECT THE PASSWORD STRENGTH:", false );
+    }
+
+
     for ( int i = 0; i < this->hackingModel->GetDifficultyCount(); ++i )
     {
         const DifficultyLevel * const difficulty = this->hackingModel->GetDifficultyLevelWithIndex( i );
 
-        COORD textPosition = {(short)( this->GetScreenWidth() - difficulty->GetName().size() ) / 2, (short)i * 2 + 5};
-        bool highlighted = this->IsCoordInString( cursorCoord, textPosition, difficulty->GetName().size() );
+        COORD textPosition = {(short)1, (short)i * 2 + 3};
+        std::string text = ">" + difficulty->GetName();
+        bool highlighted = this->IsCoordInString( cursorCoord, textPosition, text.size() );
 
-        this->RenderText( textPosition, difficulty->GetName(), highlighted );
+        if ( preRendering )
+        {
+            delay = this->RenderDelayedTextFast( textPosition, text, delay );
+        }
+        else
+        {
+            this->RenderText( textPosition, text, highlighted );
+        }
     }
 
     this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
+
+    return this->timeSinceDelayedRenderStart >= delay;
 }
 
-void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
+bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
 {
     this->RenderText( {0,0}, "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL", false );
     if ( this->hackingModel->GetAttemptsRemaining() == 1 )
@@ -343,6 +372,8 @@ void HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
                 outstr.str() );
         }
     }
+
+    return true;
 }
 
 void HackingView::RenderText( COORD position, std::string text, bool isHighlighted )
