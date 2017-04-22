@@ -45,7 +45,7 @@ private:
     bool isCursorFilled;
     COORD lastTypingCoord;
     float timeSinceDelayedRenderStart;
-    
+
 
     int GetTotalColumnWidth() const;
     int GetHexCodeLength() const;
@@ -60,9 +60,10 @@ private:
     bool RenderLockoutScreen( GameState state, COORD cursorCoord );
 
     void RenderText( COORD position, std::string text, bool isHighlighted );
-    float RenderDelayedText( COORD position, std::string text, float startDelay, float endDelay );
-    float RenderDelayedTextSlow( COORD position, std::string text, float startDelay );
-    float RenderDelayedTextFast( COORD position, std::string text, float startDelay );
+    float RenderDelayedText( COORD position, std::string text, float startDelay, float endDelay, bool highlighted = false );
+    float RenderDelayedTextSlow( COORD position, std::string text, float startDelay, bool highlighted = false );
+    float RenderDelayedTextFast( COORD position, std::string text, float startDelay, bool highlighted = false );
+    float RenderDelayedTextVeryFast( COORD position, std::string text, float startDelay, bool highlighted = false );
 
     bool IsCoordInString( const COORD & coord, const COORD & textPosition, int textLength ) const;
 

@@ -111,6 +111,9 @@ void HackingController::Run()
             case GameState::DIFFICULTY_SELECTION_PRE_RENDER:
                 this->ChangeState( GameState::DIFFICULTY_SELECTION );
                 break;
+            case GameState::PLAYING_GAME_PRE_RENDER:
+                this->ChangeState( GameState::PLAYING_GAME );
+                break;
             case GameState::GAME_OVER:
                 this->ChangeState( GameState::LOCKED_OUT );
                 break;
@@ -191,9 +194,14 @@ void HackingController::OnClickEvent()
         if ( cursorDifficulty != nullptr )
         {
             this->hackingModel->SetDifficultyLevel( cursorDifficulty );
-            this->currentState = GameState::PLAYING_GAME;
+            this->ChangeState( GameState::PLAYING_GAME_PRE_RENDER );
         }
 
+        break;
+    }
+    case GameState::PLAYING_GAME_PRE_RENDER:
+    {
+        this->ChangeState( GameState::PLAYING_GAME );
         break;
     }
     case GameState::PLAYING_GAME:

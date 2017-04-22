@@ -43,6 +43,11 @@ void HackingView::OnStateChange( GameState oldState, GameState newState )
         this->timeSinceDelayedRenderStart = 0.0f;
         this->lastTypingCoord = {-1,-1};
     }
+    else if ( oldState == GameState::DIFFICULTY_SELECTION && newState == GameState::PLAYING_GAME_PRE_RENDER )
+    {
+        this->timeSinceDelayedRenderStart = 0.0f;
+        this->lastTypingCoord = {-1,-1};
+    }
     else if ( oldState == GameState::PLAYING_GAME && newState == GameState::GAME_OVER )
     {
         this->timeSinceDelayedRenderStart = 0.0f;
@@ -75,7 +80,7 @@ bool HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
             }
 
             displayBuffer[index].Char.AsciiChar = this->delayBuffer[y][x] <= this->timeSinceDelayedRenderStart ? this->characterBuffer[y][x] : ' ';
-            displayBuffer[index].Attributes = this->highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
+            displayBuffer[index].Attributes = this->delayBuffer[y][x] <= this->timeSinceDelayedRenderStart && this->highlightBuffer[y][x] ? HIGHLIGHTED_CHAR_ATTRIBUTES : NORMAL_CHAR_ATTRIBUTES;
         }
     }
 
@@ -163,6 +168,7 @@ bool HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
         return this->RenderDifficultyScreen( cursorCoord, false );
     }
     case GameState::PLAYING_GAME:
+    case GameState::PLAYING_GAME_PRE_RENDER:
     case GameState::GAME_COMPLETE:
     case GameState::GAME_OVER:
     {
@@ -255,23 +261,55 @@ bool HackingView::RenderDifficultyScreen( COORD cursorCoord, bool preRendering )
 
 bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
 {
-    this->RenderText( {0,0}, "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL", false );
+    float delay = 0.0f;
+
+    delay = this->RenderDelayedTextFast( {0,0}, "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL", delay );
     if ( this->hackingModel->GetAttemptsRemaining() == 1 )
     {
-        this->RenderText( {0, 1}, "!!! WARNING: LOCKOUT IMMINENT !!!", false );
+        // Make the lockout indicator blink
+        float f = remainder( this->timeSinceDelayedRenderStart, 1.0f );
+        if ( f > 0.0f )
+        {
+            this->RenderText( {0, 1}, "!!! WARNING: LOCKOUT IMMINENT !!!", false );
+        }
     }
     else
     {
-        this->RenderText( {0,1}, "ENTER PASSWORD NOW", false );
+        if ( state == GameState::PLAYING_GAME_PRE_RENDER )
+        {
+            delay = this->RenderDelayedTextFast( {0,1}, "ENTER PASSWORD NOW", delay );
+        }
+        else
+        {
+            this->RenderText( {0,1}, "ENTER PASSWORD NOW", false );
+        }
+
     }
 
     std::ostringstream outstr;
     outstr << this->hackingModel->GetAttemptsRemaining() << " ATTEMPT(S) LEFT:";
-    this->RenderText( {0, 3}, outstr.str(), false );
+
+    if ( state == GameState::PLAYING_GAME_PRE_RENDER )
+    {
+        delay = this->RenderDelayedTextFast( {0, 3}, outstr.str(), delay );
+    }
+    else
+    {
+        this->RenderText( {0, 3}, outstr.str(), false );
+    }
+
     for ( int i = 0; i < this->hackingModel->GetAttemptsRemaining(); ++i )
     {
         short xOffset = (short)( outstr.str().size() + 1 + i * 2 );
-        this->RenderText( {xOffset, 3}, " ", true );
+        COORD coord = {xOffset, 3};
+        if ( state == GameState::PLAYING_GAME_PRE_RENDER )
+        {
+            delay = this->RenderDelayedTextFast( coord, " ", delay, true );
+        }
+        else
+        {
+            this->RenderText( coord, " ", true );
+        }
     }
 
     for ( int columnIndex = 0; columnIndex < this->hackingModel->GetColumnCount(); ++columnIndex )
@@ -280,11 +318,25 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
         {
             const std::string& hexCode = this->hexAddresses[columnIndex * this->hackingModel->GetColumnHeight() + rowIndex];
             COORD hexCoord = {(short)( columnIndex * this->GetTotalColumnWidth() ), (short)( rowIndex + this->GetLineCountAboveColumns() )};
-            this->RenderText( hexCoord, hexCode, false );
+            if ( state == GameState::PLAYING_GAME_PRE_RENDER )
+            {
+                delay = this->RenderDelayedTextVeryFast( hexCoord, hexCode, delay );
+            }
+            else
+            {
+                this->RenderText( hexCoord, hexCode, false );
+            }
 
             const std::string& fillerText = this->hackingModel->GetFillerText( columnIndex, rowIndex );
             COORD fillerCoord = {hexCoord.X + ( short )this->GetHexCodeLength() + 1, hexCoord.Y};
-            this->RenderText( fillerCoord, fillerText, false );
+            if ( state == GameState::PLAYING_GAME_PRE_RENDER )
+            {
+                delay = this->RenderDelayedTextVeryFast( fillerCoord, fillerText, delay );
+            }
+            else
+            {
+                this->RenderText( fillerCoord, fillerText, false );
+            }
         }
     }
 
@@ -295,8 +347,17 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
         {
             ModelCoordinate letterPos = puzzleWord->GetLetterPosition( j );
             COORD coord = this->LetterPositionToCoord( letterPos );
-            char character = puzzleWord->IsRemoved() ? '.' : puzzleWord->GetText()[j];
-            this->characterBuffer[coord.Y][coord.X] = character;
+            std::string character( 1, puzzleWord->IsRemoved() ? '.' : puzzleWord->GetText()[j] );
+
+            if ( state == GameState::PLAYING_GAME_PRE_RENDER )
+            {
+                float spotDelay = this->delayBuffer[coord.Y][coord.X];
+                this->RenderDelayedTextVeryFast( coord, character, spotDelay );
+            }
+            else
+            {
+                this->RenderText( coord, character, false );
+            }
         }
     }
 
@@ -373,7 +434,7 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
                 outstr << filler[letterPos.x];
             }
 
-            this->RenderText( highlightDisplayCoord, outstr.str(), false );
+            delay = this->RenderDelayedTextFast( highlightDisplayCoord, outstr.str(), delay );
             this->highlightBuffer[cursorCoord.Y][cursorCoord.X] = true;
         }
         else
@@ -386,8 +447,8 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
 
     if ( state == GameState::GAME_OVER )
     {
+        // Roll the lines up to the top of the screen until none can be seen
         int rowOffset = (int)( this->timeSinceDelayedRenderStart * 16.0f );
-
         for ( int i = 0; i < this->GetScreenHeight(); ++i )
         {
             if ( i + rowOffset >= this->GetScreenHeight() )
@@ -400,21 +461,23 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
             }
         }
 
+        // Rendering is done when the last line goes above the top of the screen
         return rowOffset > this->GetScreenHeight();
     }
     else
     {
-        return true;
+        // Rendering is done when the last delayed character is rendered
+        return delay <= this->timeSinceDelayedRenderStart;
     }
 }
 
 bool HackingView::RenderLockoutScreen( GameState state, COORD cursorCoord )
 {
     std::string msg = "TERMINAL LOCKED";
-    this->RenderText( {(short)( this->GetScreenWidth() / 2 - msg.size()/2 ), (short)( this->GetScreenHeight() / 2 - 2 )}, msg, false );
+    this->RenderText( {(short)( this->GetScreenWidth() / 2 - msg.size() / 2 ), (short)( this->GetScreenHeight() / 2 - 2 )}, msg, false );
 
     msg = "PLEASE CONTACT AN ADMINISTRATOR";
-    this->RenderText( {(short)( this->GetScreenWidth() / 2 - msg.size()/2 ), (short)( this->GetScreenHeight() / 2 )}, msg, false );
+    this->RenderText( {(short)( this->GetScreenWidth() / 2 - msg.size() / 2 ), (short)( this->GetScreenHeight() / 2 )}, msg, false );
 
     return true;
 }
@@ -428,26 +491,31 @@ void HackingView::RenderText( COORD position, std::string text, bool isHighlight
     }
 }
 
-float HackingView::RenderDelayedText( COORD position, std::string text, float startDelay, float endDelay )
+float HackingView::RenderDelayedText( COORD position, std::string text, float startDelay, float endDelay, bool highlighted )
 {
-    this->characterBuffer[position.Y].replace( position.X, text.size(), text );
+    this->RenderText( position, text, highlighted );
 
     for ( int i = 0; i < (int)text.size(); ++i )
     {
-        this->delayBuffer[position.Y][position.X + i] = startDelay + ( startDelay == endDelay ? 0.0f : ( ( endDelay - startDelay ) / ( (float)text.size() - 1 ) * (float)i ) );
+        this->delayBuffer[position.Y][position.X + i] = startDelay + ( text.size() == 1 ? 0.0f : ( ( endDelay - startDelay ) / ( (float)text.size() - 1 ) * (float)i ) );
     }
 
     return endDelay;
 }
 
-float HackingView::RenderDelayedTextSlow( COORD position, std::string text, float startDelay )
+float HackingView::RenderDelayedTextSlow( COORD position, std::string text, float startDelay, bool highlighted )
 {
-    return this->RenderDelayedText( position, text, startDelay, startDelay + (float)text.size() * 0.055f );
+    return this->RenderDelayedText( position, text, startDelay, startDelay + (float)text.size() * 0.055f, highlighted );
 }
 
-float HackingView::RenderDelayedTextFast( COORD position, std::string text, float startDelay )
+float HackingView::RenderDelayedTextFast( COORD position, std::string text, float startDelay, bool highlighted )
 {
-    return this->RenderDelayedText( position, text, startDelay, startDelay + (float)text.size() * 0.015f );
+    return this->RenderDelayedText( position, text, startDelay, startDelay + (float)text.size() * 0.015f, highlighted );
+}
+
+float HackingView::RenderDelayedTextVeryFast( COORD position, std::string text, float startDelay, bool highlighted )
+{
+    return this->RenderDelayedText( position, text, startDelay, startDelay + (float)text.size() * 0.005f, highlighted );
 }
 
 bool HackingView::IsCoordInString( const COORD & coord, const COORD & textPosition, int textLength ) const
