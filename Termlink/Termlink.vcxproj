@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{98538186-2F01-43D9-A960-227D94B52DE2}</ProjectGuid>
     <RootNamespace>Hacking</RootNamespace>
-    <ProjectName>FOHacker</ProjectName>
+    <ProjectName>Termlink</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
