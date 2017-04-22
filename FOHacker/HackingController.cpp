@@ -110,6 +110,10 @@ void HackingController::Run()
             {
             case GameState::DIFFICULTY_SELECTION_PRE_RENDER:
                 this->ChangeState( GameState::DIFFICULTY_SELECTION );
+                break;
+            case GameState::GAME_OVER:
+                this->ChangeState( GameState::LOCKED_OUT );
+                break;
             }
         }
 
@@ -199,19 +203,25 @@ void HackingController::OnClickEvent()
         {
             PuzzleWord const * puzzleWord = this->hackingModel->GetPuzzleWordAtCoord( letterPos );
 
-            if ( puzzleWord != nullptr && !puzzleWord->IsRemoved())
+            if ( puzzleWord != nullptr && !puzzleWord->IsRemoved() )
             {
                 if ( this->hackingModel->AttemptWord( puzzleWord ) )
                 {
                     this->currentState = GameState::GAME_COMPLETE;
                 }
+                else if ( this->hackingModel->GetAttemptsRemaining() == 0 )
+                {
+                    this->ChangeState( GameState::GAME_OVER );
+                }
             }
-
-            BracketPair const * bracketPair = this->hackingModel->GetBracketPairAtCoord( letterPos );
-
-            if ( bracketPair != nullptr )
+            else
             {
-                this->hackingModel->AttemptBracketPair( bracketPair );
+                BracketPair const * bracketPair = this->hackingModel->GetBracketPairAtCoord( letterPos );
+
+                if ( bracketPair != nullptr )
+                {
+                    this->hackingModel->AttemptBracketPair( bracketPair );
+                }
             }
         }
 
@@ -220,6 +230,17 @@ void HackingController::OnClickEvent()
     case GameState::GAME_COMPLETE:
     {
         this->isDone = true;
+        break;
+    }
+    case GameState::GAME_OVER:
+    {
+        this->currentState = GameState::LOCKED_OUT;
+        break;
+    }
+    case GameState::LOCKED_OUT:
+    {
+        this->isDone = true;
+        break;
     }
     }
 }

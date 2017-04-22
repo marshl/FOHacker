@@ -13,6 +13,9 @@ enum GameState
     PLAYING_GAME_PRE_RENDER,
     PLAYING_GAME,
     GAME_COMPLETE,
+
+    GAME_OVER,
+    LOCKED_OUT,
 };
 
 #endif

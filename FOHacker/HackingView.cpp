@@ -43,6 +43,11 @@ void HackingView::OnStateChange( GameState oldState, GameState newState )
         this->timeSinceDelayedRenderStart = 0.0f;
         this->lastTypingCoord = {-1,-1};
     }
+    else if ( oldState == GameState::PLAYING_GAME && newState == GameState::GAME_OVER )
+    {
+        this->timeSinceDelayedRenderStart = 0.0f;
+        this->lastTypingCoord = {-1,-1};
+    }
 }
 
 bool HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
@@ -159,9 +164,12 @@ bool HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
     }
     case GameState::PLAYING_GAME:
     case GameState::GAME_COMPLETE:
+    case GameState::GAME_OVER:
     {
         return this->RenderGameScreen( state, cursorCoord );
     }
+    case GameState::LOCKED_OUT:
+        return this->RenderLockoutScreen( state, cursorCoord );
     default:
         return false;
     }
@@ -292,11 +300,13 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
         }
     }
 
-    int attemptedWordOffset = 0;
+    COORD highlightDisplayCoord = {(short)( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() ), (short)( this->GetScreenHeight() - 1 )};
+
+    int attemptedWordOffset = 1;
     for ( int i = this->hackingModel->GetPlayerActionCount() - 1; i >= 0; --i )
     {
         PlayerAction const * playerAction = this->hackingModel->GetPlayerAction( i );
-        COORD coord = {(short)( this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount() + 1 ),(short)( this->GetScreenHeight() - 2 - attemptedWordOffset )};
+        COORD coord = {highlightDisplayCoord.X, highlightDisplayCoord.Y - (short)attemptedWordOffset};
 
         for ( int j = 0; j < playerAction->GetDisplayHeight(); ++j )
         {
@@ -310,8 +320,6 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
             }
         }
     }
-
-    COORD highlightDisplayCoord = {this->GetTotalColumnWidth() * this->hackingModel->GetColumnCount(), this->GetScreenHeight() - 1};
 
     if ( state == GameState::PLAYING_GAME )
     {
@@ -375,6 +383,38 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
             this->RenderText( highlightDisplayCoord, outstr.str(), false );
         }
     }
+
+    if ( state == GameState::GAME_OVER )
+    {
+        int rowOffset = (int)( this->timeSinceDelayedRenderStart * 16.0f );
+
+        for ( int i = 0; i < this->GetScreenHeight(); ++i )
+        {
+            if ( i + rowOffset >= this->GetScreenHeight() )
+            {
+                this->characterBuffer[i] = std::string( this->GetScreenWidth(), ' ' );
+            }
+            else
+            {
+                this->characterBuffer[i] = this->characterBuffer[i + rowOffset];
+            }
+        }
+
+        return rowOffset > this->GetScreenHeight();
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool HackingView::RenderLockoutScreen( GameState state, COORD cursorCoord )
+{
+    std::string msg = "TERMINAL LOCKED";
+    this->RenderText( {(short)( this->GetScreenWidth() / 2 - msg.size()/2 ), (short)( this->GetScreenHeight() / 2 - 2 )}, msg, false );
+
+    msg = "PLEASE CONTACT AN ADMINISTRATOR";
+    this->RenderText( {(short)( this->GetScreenWidth() / 2 - msg.size()/2 ), (short)( this->GetScreenHeight() / 2 )}, msg, false );
 
     return true;
 }
