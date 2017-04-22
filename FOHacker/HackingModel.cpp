@@ -70,11 +70,6 @@ PuzzleWord const * HackingModel::GetPuzzleWordAtPosition( int columnIndex, int r
     {
         PuzzleWord * const puzzleWord = this->puzzleWords[wordIndex];
 
-        if ( puzzleWord->IsRemoved() )
-        {
-            continue;
-        }
-
         for ( int letterIndex = 0; letterIndex < (int)puzzleWord->GetText().size(); ++letterIndex )
         {
             const ModelCoordinate& letterPos = puzzleWord->GetLetterPosition( letterIndex );

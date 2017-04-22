@@ -199,7 +199,7 @@ void HackingController::OnClickEvent()
         {
             PuzzleWord const * puzzleWord = this->hackingModel->GetPuzzleWordAtCoord( letterPos );
 
-            if ( puzzleWord != nullptr )
+            if ( puzzleWord != nullptr && !puzzleWord->IsRemoved())
             {
                 if ( this->hackingModel->AttemptWord( puzzleWord ) )
                 {
