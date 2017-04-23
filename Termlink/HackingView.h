@@ -58,6 +58,7 @@ private:
     bool RenderDifficultyScreen( COORD cursorCoord, bool preRendering );
     bool RenderGameScreen( GameState state, COORD cursorCoord );
     bool RenderLockoutScreen( GameState state, COORD cursorCoord );
+    bool RenderLoginScreen( GameState state, COORD cursorCoord );
 
     void RenderText( COORD position, std::string text, bool isHighlighted );
     float RenderDelayedText( COORD position, std::string text, float startDelay, float endDelay, bool highlighted = false );

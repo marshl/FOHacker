@@ -34,25 +34,8 @@ HackingView::~HackingView()
 
 void HackingView::OnStateChange( GameState oldState, GameState newState )
 {
-    if ( oldState == GameState::NONE &&  newState == GameState::PRE_GAME )
-    {
-        this->timeSinceDelayedRenderStart = 0.0f;
-    }
-    else if ( oldState == GameState::PRE_GAME && newState == GameState::DIFFICULTY_SELECTION_PRE_RENDER )
-    {
-        this->timeSinceDelayedRenderStart = 0.0f;
-        this->lastTypingCoord = {-1,-1};
-    }
-    else if ( oldState == GameState::DIFFICULTY_SELECTION && newState == GameState::PLAYING_GAME_PRE_RENDER )
-    {
-        this->timeSinceDelayedRenderStart = 0.0f;
-        this->lastTypingCoord = {-1,-1};
-    }
-    else if ( oldState == GameState::PLAYING_GAME && newState == GameState::GAME_OVER )
-    {
-        this->timeSinceDelayedRenderStart = 0.0f;
-        this->lastTypingCoord = {-1,-1};
-    }
+    this->timeSinceDelayedRenderStart = 0.0f;
+    this->lastTypingCoord = {-1,-1};
 }
 
 bool HackingView::Render( GameState state, float deltaTime, COORD cursorCoord )
@@ -176,6 +159,8 @@ bool HackingView::RefreshBuffer( GameState state, COORD cursorCoord )
     }
     case GameState::LOCKED_OUT:
         return this->RenderLockoutScreen( state, cursorCoord );
+    case GameState::LOGIN:
+        return this->RenderLoginScreen( state, cursorCoord );
     default:
         return false;
     }
@@ -263,7 +248,15 @@ bool HackingView::RenderGameScreen( GameState state, COORD cursorCoord )
 {
     float delay = 0.0f;
 
-    delay = this->RenderDelayedTextFast( {0,0}, "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL", delay );
+    if ( state == GameState::PLAYING_GAME_PRE_RENDER )
+    {
+        delay = this->RenderDelayedTextFast( {0,0}, "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL", delay );
+    }
+    else
+    {
+        this->RenderText( {0,0}, "ROBCO INDUSTRIES (TM) TERMALINK PROTOCOL", false );
+    }
+
     if ( this->hackingModel->GetAttemptsRemaining() == 1 )
     {
         // Make the lockout indicator blink
@@ -480,6 +473,28 @@ bool HackingView::RenderLockoutScreen( GameState state, COORD cursorCoord )
     this->RenderText( {(short)( this->GetScreenWidth() / 2 - msg.size() / 2 ), (short)( this->GetScreenHeight() / 2 )}, msg, false );
 
     return true;
+}
+
+bool HackingView::RenderLoginScreen( GameState state, COORD cursorCoord )
+{
+    float delay = 0.0f;
+
+    delay = this->RenderDelayedTextFast( {0, 0}, "WELCOME TO ROBCO INDUSTRIES (TM) TERMALINK", delay );
+
+    delay = this->RenderDelayedTextFast( {0, 3}, "> ", delay );
+    delay += 1.0f;
+
+    delay += this->RenderDelayedTextSlow( {2, 3}, "LOGON ADMIN", delay );
+    delay += 0.5f;
+
+    delay = this->RenderDelayedTextFast( {0, 5}, "ENTER PASSWORD NOW", delay );
+    
+    delay = this->RenderDelayedTextSlow( {0, 7}, ">", delay );
+    delay += 1.0f;
+
+    delay = this->RenderDelayedTextSlow( {2, 7}, std::string( this->hackingModel->GetCurrentDifficulty()->GetWordLength(), '*' ), delay );
+
+    return this->timeSinceDelayedRenderStart >= delay;
 }
 
 void HackingView::RenderText( COORD position, std::string text, bool isHighlighted )

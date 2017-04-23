@@ -117,6 +117,9 @@ bool HackingController::Run()
             case GameState::GAME_OVER:
                 this->ChangeState( GameState::LOCKED_OUT );
                 break;
+            case GameState::LOGIN:
+                this->isDone = true;
+                break;
             }
         }
 
@@ -124,7 +127,8 @@ bool HackingController::Run()
         Sleep( 1000 / 24 );
     }
 
-    return this->currentState == GameState::GAME_COMPLETE;
+    // Return success if the player finished the game
+    return this->currentState == GameState::LOGIN;
 }
 
 
@@ -140,7 +144,7 @@ void HackingController::SetupWindow()
         this->isDone = true;
     }
 
-    SetConsoleTitle( "Hacking" );
+    SetConsoleTitle( "RobCo Industries (TM) Termlink" );
 
     // Remove blinking cursor
     CONSOLE_CURSOR_INFO cursorInfo;
@@ -238,6 +242,11 @@ void HackingController::OnClickEvent()
         break;
     }
     case GameState::GAME_COMPLETE:
+    {
+        this->ChangeState( GameState::LOGIN );
+        break;
+    }
+    case GameState::LOGIN:
     {
         this->isDone = true;
         break;
