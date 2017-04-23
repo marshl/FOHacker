@@ -17,7 +17,7 @@ public:
     HackingController( HackingModel* hackingModel, HackingView* hackingView );
     ~HackingController();
 
-    void Run();
+    bool Run();
 
 private:
     HackingView* hackingView;

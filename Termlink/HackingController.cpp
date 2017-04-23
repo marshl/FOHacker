@@ -44,7 +44,7 @@ HackingController::~HackingController()
     CloseHandle( this->outputHandle );
 }
 
-void HackingController::Run()
+bool HackingController::Run()
 {
     this->SetupWindow();
     this->ChangeState( GameState::PRE_GAME );
@@ -123,6 +123,8 @@ void HackingController::Run()
 
         Sleep( 1000 / 24 );
     }
+
+    return this->currentState == GameState::GAME_COMPLETE;
 }
 
 
