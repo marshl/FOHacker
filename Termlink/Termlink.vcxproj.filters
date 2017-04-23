@@ -80,7 +80,7 @@
     <None Include="dictionary" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="hacking_icon.ico">
+    <Image Include="termlink.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
