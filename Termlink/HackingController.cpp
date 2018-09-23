@@ -11,7 +11,7 @@
 #include <sstream>
 #include <list>
 #include <ctime>
-#include <boost/algorithm/clamp.hpp>
+#include <algorithm>
 
 #include "strfunc.h"
 #include "PuzzleWord.h"
@@ -71,8 +71,8 @@ bool HackingController::Run()
                 if ( inputRecord.EventType == MOUSE_EVENT )
                 {
                     cursorCoord = inputRecord.Event.MouseEvent.dwMousePosition;
-                    cursorCoord.X = boost::algorithm::clamp( (int)cursorCoord.X, 0, this->hackingView->GetScreenWidth() - 1 );
-                    cursorCoord.Y = boost::algorithm::clamp( (int)cursorCoord.Y, 0, this->hackingView->GetScreenHeight() - 1 );
+                    cursorCoord.X = max(0, min((int)cursorCoord.X,this->hackingView->GetScreenWidth() - 1 ));
+                    cursorCoord.Y = max(0, min((int)cursorCoord.Y, this->hackingView->GetScreenHeight() - 1 ));
 
                     if ( lastMouseState & FROM_LEFT_1ST_BUTTON_PRESSED && !inputRecord.Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED )
                     {
