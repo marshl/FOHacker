@@ -5,32 +5,32 @@
 class BracketPair
 {
 public:
-    BracketPair( char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition );
+	BracketPair(char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition);
 
-    char GetOpeningSymbol() const;
-    char GetClosingSymbol() const;
+	char GetOpeningSymbol() const;
+	char GetClosingSymbol() const;
 
-    int GetColumn() const;
-    int GetRow() const;
+	int GetColumn() const;
+	int GetRow() const;
 
-    int GetStartingPosition() const;
-    int GetEndingPosition() const;
+	int GetStartingPosition() const;
+	int GetEndingPosition() const;
 
-    bool IsConsumed() const;
-    void Consume();
+	bool IsConsumed() const;
+	void Consume();
 
 private:
 
-    char openingSymbol;
-    char closingSymbol;
+	char openingSymbol;
+	char closingSymbol;
 
-    int column;
-    int row;
+	int column;
+	int row;
 
-    int startingPosition;
-    int endingPosition;
+	int startingPosition;
+	int endingPosition;
 
-    bool isConsumed;
+	bool isConsumed;
 };
 
 #endif

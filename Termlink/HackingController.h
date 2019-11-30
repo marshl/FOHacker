@@ -14,28 +14,28 @@ class PuzzleWord;
 class HackingController
 {
 public:
-    HackingController( HackingModel* hackingModel, HackingView* hackingView );
-    ~HackingController();
+	HackingController(HackingModel* hackingModel, HackingView* hackingView);
+	~HackingController();
 
-    bool Run();
+	bool Run();
 
 private:
-    HackingView* hackingView;
-    HackingModel* hackingModel;
+	HackingView* hackingView;
+	HackingModel* hackingModel;
 
-    GameState currentState;
+	GameState currentState;
 
-    COORD cursorCoord;
+	COORD cursorCoord;
 
-    HANDLE inputHandle;
-    HANDLE outputHandle;
+	HANDLE inputHandle;
+	HANDLE outputHandle;
 
-    void SetupWindow();
-    void OnClickEvent();
+	void SetupWindow();
+	void OnClickEvent();
 
-    void ChangeState( GameState newState );
+	void ChangeState(GameState newState);
 
-    bool isDone;
+	bool isDone;
 };
 
 #endif

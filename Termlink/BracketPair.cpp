@@ -2,64 +2,64 @@
 
 #include <cassert>
 
-BracketPair::BracketPair( char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition )
+BracketPair::BracketPair(char openingSymbol, char closingSymbol, int column, int row, int startingPosition, int endingPosition)
 {
-    this->openingSymbol = openingSymbol;
-    this->closingSymbol = closingSymbol;
+	this->openingSymbol = openingSymbol;
+	this->closingSymbol = closingSymbol;
 
-    assert( column >= 0 );
-    this->column = column;
+	assert(column >= 0);
+	this->column = column;
 
-    assert( row >= 0 );
-    this->row = row;
+	assert(row >= 0);
+	this->row = row;
 
-    assert( startingPosition >= 0 );
-    this->startingPosition = startingPosition;
+	assert(startingPosition >= 0);
+	this->startingPosition = startingPosition;
 
-    assert( endingPosition > startingPosition );
-    assert( endingPosition >= 0 );
-    this->endingPosition = endingPosition;
+	assert(endingPosition > startingPosition);
+	assert(endingPosition >= 0);
+	this->endingPosition = endingPosition;
 
-    this->isConsumed = false;
+	this->isConsumed = false;
 
 }
 
 char BracketPair::GetOpeningSymbol() const
 {
-    return this->openingSymbol;
+	return this->openingSymbol;
 }
 
 char BracketPair::GetClosingSymbol() const
 {
-    return this->closingSymbol;
+	return this->closingSymbol;
 }
 
 int BracketPair::GetColumn() const
 {
-    return this->column;
+	return this->column;
 }
 
 int BracketPair::GetRow() const
 {
-    return this->row;
+	return this->row;
 }
 
 int BracketPair::GetStartingPosition() const
 {
-    return this->startingPosition;
+	return this->startingPosition;
 }
 
 int BracketPair::GetEndingPosition() const
 {
-    return this->endingPosition;
+	return this->endingPosition;
 }
 
 bool BracketPair::IsConsumed() const
 {
-    return this->isConsumed;
+	return this->isConsumed;
 }
 
 void BracketPair::Consume()
 {
-    this->isConsumed = true;
+	this->isConsumed = true;
 }
